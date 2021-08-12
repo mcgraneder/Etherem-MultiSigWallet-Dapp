@@ -1,0 +1,10 @@
+@use 'custom';
+
+@use 'components/popups.scss';
+@use 'components/mixins';
+@use 'components/typography';
+@use 'components/buttons';
+
+@use 'sections/navbar';
+@use 'sections/admin-section';
+@use 'sections/page_loader';

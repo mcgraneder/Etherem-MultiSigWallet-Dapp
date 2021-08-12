@@ -1,0 +1,47 @@
+
+@use '../custom' as *;
+
+.navbar
+        {
+            border-bottom:1px solid rgba($primary, 0.95) !important;
+          
+        }
+
+#acc {
+    margin-right: 10px !important;
+}
+.menu {
+    background: linear-gradient(to right, rgba($primary, 1), rgba($secondary, 1));
+    border-bottom: 5px;
+    border-color: white;
+}
+.menu a {
+    color: white !important;
+    padding-left: 1rem;
+}
+.menu li {
+    // padding increases the space between elements
+    padding: 0 0.7rem;
+
+}
+
+
+
+.menu .dropdown-menu {
+    background: linear-gradient(to right, rgba($primary, 1), rgba($secondary, 1));
+    border-bottom: 5px;
+    border-color: white;
+}
+
+.menu .dropdown-menu .dropdown-item:hover {
+    background: #052f74;
+}
+
+.menu ul .navbar-item:hover {
+    background:rgba(19, 226, 233, 0.308);
+    
+}
+
+
+
+

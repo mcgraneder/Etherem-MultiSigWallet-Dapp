@@ -1,0 +1,134 @@
+@use '../custom' as *;
+
+.buttons tr td {
+    padding: 5px;
+}
+.buttons span
+{
+//     box-sizing: border-box;
+// 	-webkit-box-sizing: border-box;
+// 	-moz-box-sizing: border-box;
+	width: 100%;
+    display: flex;
+    // margin-left: auto;
+    // margin-right: auto;
+	// padding: 8%;
+	background: rgba(18, 25, 51, 0.527);
+	border: 1px solid rgba(255, 0, 221, 0.979);
+    border-radius: 5px;
+	// border-top-style: none;
+	// border-right-style: none;
+	// border-left-style: none;	
+	color: #fff;
+}
+
+.buttons span:hover {
+    background: rgba(18, 25, 51, 0.527);
+    border-color: white;
+}
+
+.buttons span:focus {
+    background: rgba(18, 25, 51, 0.527) !important;
+    // border-color: white;
+}
+
+
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+
+button{
+  padding: 8px 16px;
+  font-size: 25px;
+  font-weight: 500;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+  background: #e69100;
+  color: white;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+.alert{
+  background: rgba(141, 1, 255, 0.87);
+  padding: 20px 40px;
+  min-width: 420px;
+  position: fixed;
+  right: 0;
+  top: 85%;
+  border-radius: 4px;
+//   border: 1px 8px 1px 1px solid #170a31;
+  border-left: 8px solid #170a31;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.alert.showAlert{
+  opacity: 1;
+  pointer-events: auto;
+}
+.alert.show{
+  animation: show_slide 1s ease forwards;
+}
+@keyframes show_slide {
+  0%{
+    transform: translateX(100%);
+  }
+  40%{
+    transform: translateX(-10%);
+  }
+  80%{
+    transform: translateX(0%);
+  }
+  100%{
+    transform: translateX(-10px);
+  }
+}
+.alert.hide{
+  animation: hide_slide 1s ease forwards;
+}
+@keyframes hide_slide {
+  0%{
+    transform: translateX(-10px);
+  }
+  40%{
+    transform: translateX(0%);
+  }
+  80%{
+    transform: translateX(-10%);
+  }
+  100%{
+    transform: translateX(100%);
+  }
+}
+.alert .fa-exclamation-circle{
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #170a31;
+  font-size: 30px;
+}
+.alert .msg{
+  padding: 0 20px;
+  font-size: 18px;
+  color: #ffffff;
+}
+.alert .close-btn{
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #170a31;
+  padding: 20px 18px;
+  cursor: pointer;
+}
+.alert .close-btn:hover{
+  background: #280d5e;
+}
+.alert .close-btn .fas{
+  color: white;
+  font-size: 22px;
+  line-height: 40px;
+}
+
+
+
