@@ -144,12 +144,15 @@
             </div>
             <div class="table buttons">
                 <table id="customers">
-                    <tr>
-                      <th>Address</th>
-                      <th>Name</th>
-                      <th>Remove</th>
-                      
-                    </tr>
+                    <tbody>
+                        <tr>
+                            <th>Address</th>
+                            <th>Name</th>
+                            <th>Remove</th>
+                            
+                          </tr>
+                    </tbody>
+                    
 
                 
                   </table>
@@ -202,38 +205,7 @@
                 <h4 class="display-4">Transfer</h4>
                 <div class="heading-line"></div>
             </div>
-            <div class="content">  
-                <div class="heading">
-                    <h6 class="display-6">Create Transfer</h6>
-                </div>
-                <div class="remove-user-from">
-                    <div class="form-style-6">
-                        
-                        <form>
-                            <input id="create-transfer-reciever-address-field" type="text" name="field1" placeholder="Reciever Address" required/>
-                            <input id="create-transfer-amount-field" type="number" name="field1" placeholder="Amount" required/>
-                            <input id="transfer" class="submit-button" type="Button" value="Transfer" required/>
-                        </form> 
-                    </div>
-                </div> 
-            </div>      
-                
-            <div class="content">  
-                <div class="heading">
-                    <h6 class="display-6">Cancel Transfer</h6>
-                </div>
-                <div class="remove-user-from">
-                    <div class="form-style-6">
-                            
-                        <form>
-                            <input id="cancel-transfer-reciever-address-field" type="text" name="field1" placeholder="Transaction Hash" required/>
-                            <input id="cancel-transfer-amount-field" type="number" name="field1" placeholder="Transfer ID" required/>
-                            <input id="cancel-transfer" class="submit-button" type="Button" value="Cancel Transfer" required/>
-                        </form> 
-                    </div>
-                </div>       
-            </div>
-
+            
             <div class="content-table">  
                 <div class="heading">
                     <h6 class="display-6">Deposit Histroy</h6>
@@ -264,7 +236,7 @@
                 </div>
                 <div class="table buttons">
                     <table id="customers">
-                        <tbody id="deposit-histroy-table">
+                        <tbody id="withdraw-histroy-table">
                             <tr>
                                 <th>TX ID</th>
                                 <th>Amount ETH</th>
@@ -283,6 +255,121 @@
             </div>
         </section>
         
+
+        <!-- transfer histroy section -->
+        <section>
+            <div class="Containe">
+                <div class="heading">
+                    <h4 class="display-4">Transfer Histroy</h4>
+                    <div class="heading-line"></div>
+                </div>
+
+                <div class="content">  
+                    <div class="heading">
+                        <h6 class="display-6">Create Transfer</h6>
+                    </div>
+                    <div class="remove-user-from">
+                        <div class="form-style-6">
+                            
+                            <form>
+                                <input id="create-transfer-reciever-address-field" type="text" name="field1" placeholder="Reciever Address" required/>
+                                <input id="create-transfer-amount-field" type="number" name="field1" placeholder="Amount" required/>
+                                <input id="transfer" class="submit-button" type="Button" value="Transfer" required/>
+                            </form> 
+                        </div>
+                    </div> 
+                </div>      
+                    
+                <div class="content">  
+                    <div class="heading">
+                        <h6 class="display-6">Cancel Transfer</h6>
+                    </div>
+                    <div class="remove-user-from">
+                        <div class="form-style-6">
+                                
+                            <form>
+                                <input id="cancel-transfer-reciever-address-field" type="text" name="field1" placeholder="Transaction Hash" required/>
+                                <input id="cancel-transfer-id-field" type="number" name="field1" placeholder="Transfer ID" required/>
+                                <input id="cancel-transfer" class="submit-button" type="Button" value="Cancel Transfer" required/>
+                            </form> 
+                        </div>
+                    </div>       
+                </div>
+    
+                
+                <div class="content">
+                    
+                        <div class="heading">
+                            <h6 class="display-6">Approve Transfer</h6>
+                        </div>
+                        <div class="add-user-from">
+                            <div class="form-style-6">
+                                
+                                <form>
+                                    <input id="approve-transfer-field" type="number" name="field1" placeholder="Transfer ID" required/>
+                                    <input id="approveTransfer" class="submit-button" type="Button" value="Approve Transfer" required/>
+                                </form>
+                            </div>
+                        </div>
+                       
+                    
+                </div>  
+                
+                <div class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Pending Tranfers</h6>
+                    </div>
+                    <div class="table buttons">
+                        <table id="customers">
+                            <tbody id="pending-transfers-table">
+                                <tr>
+                                    <th>TX ID</th>
+                                    <th>Receiver Address</th>
+                                    <th>Sender Address</th>
+                                    <th>Amount ETH</th>
+                                    <th>Date</th>
+                                    <th>Approvals</th>
+                                   
+                                    
+                                  </tr>
+                                  
+                            </tbody>
+                            
+                            
+                        
+                          </table>
+                    </div>    
+                    
+                    
+                </div>
+    
+                <div class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Transfers Histroy</h6>
+                    </div>
+                    <div class="table buttons">
+                        <table id="customers">
+                            <tbody id="transfer-histroy-table">
+                                <tr>
+                                    <th>TX ID</th>
+                                    <th>Sender Address</th>
+                                    <th>Receiver Address</th>
+                                    <th>Amount ETH</th>
+                                    <th>Date</th>
+                            
+                                    
+                                  </tr>
+                                  
+                            </tbody>
+                            
+                            
+                        
+                          </table>
+                    </div>    
+                    
+                    
+                </div>
+            </section>
    
 
 

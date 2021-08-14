@@ -7,7 +7,7 @@ var acc = "";
 var account = "";
 var contractInstance = "";
 var walletOwners = [];
-
+var pendingTranfers;
 var a = 20;
 
 
@@ -60,31 +60,11 @@ async function loadWeb3() {
   console.log(walletOwners);
   // getWalletOwners();
   console.log(walletOwners)
+  const pendingTranfer = contractInstance.methods.getTransferRequests().call().then(function(result) {
+      
+    console.log(result[0].amount);
 
-  // var results = contractInstance.getPastEvents(
-  //   "fundsDeposited",
-  //   {fromBlock: 0}
-  // ).then(function(result) {
-  //   // console.log(result[0].returnValues.amount)
-  //   for (let i = 0; i < result.length; i++) {
-  //     var returnedDepositAmount = result[i].returnValues.amount;
-  //     returnedDepositAmount = returnedDepositAmount / 10 ** 18;
-  //     var date = result[i].returnValues.timeOfDeposit;
-  //     var date1 = new Date(date * 1000);
-  //     // console.log(date1.toUTCString())
-  //     addDepositToTable.innerHTML += `
-  //         <tr class="tablerow">
-  //             <td>${result[i].returnValues.to}</td>
-  //             <td>${returnedDepositAmount + " ETH"}</td>
-  //             <td>${date1.toUTCString()}</td>
-  //         </tr>`
-  //   }
-  
-  // })
-  
-
-  
-
+  })
 
   }
 
@@ -133,7 +113,7 @@ function addUser(){
           <tr class="tablerow">
               <td>${addUserNullAddressField.value}</td>
               <td>${"Evan McGrane"}</td>
-              <td><span>Remove</span></td>
+              <td><span class="testb">Remove</span></td>
               
               
               
@@ -236,9 +216,9 @@ async function getWalletOwners() {
     for (let i = 0; i < result.length; i++) {
       addUserToTable.innerHTML += `
           <tr class="tablerow">
-              <td>${result[i]}</td>
-              <td>${"Evan McGrane"}</td>
-              <td><span>Remove</span></td>
+              <td id="${result[i]}">${result[i]}</td>
+              <td id="${result[i]}">${"Evan McGrane"}</td>
+              <td id="${result[i]}"><span>Remove</span></td>
           </tr>`
     }
   })
@@ -384,7 +364,235 @@ function withdrawFunds() {
 
     })
   })
+
+  contractInstance.once('fundsWithdrawed', 
+        {
+        filter: { player: acc },
+        fromBlock: 'latest'
+        }, (error, event) => {
+        if(error) throw("Error fetching events");
+        console.log("oracle resolved");
+        console.log(event.returnedValues);
+        var withdrawDate = event.returnValues.timeOfWithdrawal;
+        var withdrawDate1 = new Date(withdrawDate * 1000);
+        var returnedWithdrawedAmount = event.returnValues.amount;
+        returnedWithdrawedAmount = returnedWithdrawedAmount / 10 ** 18;
+        addWithdrawalToTable.innerHTML += `
+          <tr class="tablerow">
+              <td>${event.returnValues.id}</td>
+              <td>${returnedWithdrawedAmount + " ETH"}</td>
+              <td>${withdrawDate1.toUTCString()}</td>
+          </tr>`
+      })
 }
+
+function createTransferRequest() {
+
+  loadBlockchainData();
+  var receiverAddress = document.getElementById("create-transfer-reciever-address-field");
+  var transferAmount = document.getElementById("create-transfer-amount-field");
+
+  
+  if (receiverAddress.value == "" || transferAmount.value == "" ) {
+    document.getElementById("popup-1").classList.toggle("active");
+    return;
+  }
+  
+
+  const createTransferRequest = contractInstance.methods.createTransfer(web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress.value).send({from: acc}).on("transactionHash", function(hash) {
+        
+    console.log(hash);
+    loadLoader();
+    
+  })
+  //get confirmation message on confirmation
+  .on("confirmation", function(confirmationNr) {
+      console.log(confirmationNr);
+    
+
+      
+
+  })
+  //get receipt when ransaction is first mined
+  .on("receipt", function(receipt) {
+      console.log(receipt);
+      alert("Transaction successful");
+      hideLoader();
+      var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been created";
+      const pendingTranfer = contractInstance.methods.getTransferRequests().call().then(function(result) {
+      
+        console.log(result[result.length - 1].amount);
+        var transferDate = result[result.length - 1].timeOfCreation;
+        var transferDate1 = new Date(transferDate * 1000);
+        addPendingTranferToTable.innerHTML += `
+        <tr class="tablerow">
+              <td>${result[result.length - 1].id}</td>
+              <td>${result[result.length - 1].receiver.slice(0, 15) + "..."}</td>
+              <td>${result[result.length - 1].sender.slice(0, 15) + "..."}</td>
+              <td>${result[result.length - 1].amount / 10**18 + " ETH"}</td>
+              <td>${transferDate1.toUTCString()}</td>
+              <td>${result[result - 1].approvals}</td>
+              <td><span>Cancel</span></td>
+              <td><span>Approve</span></td>
+             
+              
+              
+              
+            
+          </tr>`
+    
+      })
+      
+      displayAddOwnerPopup(popupMessage);
+      
+      
+
+  }).on("error", function(error) {
+      console.log("user denied transaction");
+      
+      hideLoader();
+      
+      
+      // $(".loading").hide();
+      
+  })
+
+}
+
+function approveTransfer() {
+
+  loadBlockchainData();
+  var receiverAddress = document.getElementById("create-transfer-reciever-address-field");
+  var transferAmount = document.getElementById("create-transfer-amount-field");
+
+  
+  if (receiverAddress.value == "" || transferAmount.value == "" ) {
+    document.getElementById("popup-1").classList.toggle("active");
+    return;
+  }
+  
+
+  const createTransferRequest = contractInstance.methods.createTransfer(web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress.value).send({from: acc}).on("transactionHash", function(hash) {
+        
+    console.log(hash);
+    loadLoader();
+    
+  })
+  //get confirmation message on confirmation
+  .on("confirmation", function(confirmationNr) {
+      console.log(confirmationNr);
+    
+
+      
+
+  })
+  //get receipt when ransaction is first mined
+  .on("receipt", function(receipt) {
+      console.log(receipt);
+      alert("Transaction successful");
+      hideLoader();
+      var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been created";
+      const pendingTranfer = contractInstance.methods.getTransferRequests().call().then(function(result) {
+      
+        console.log(result[result.length - 1].amount);
+        var transferDate = result[result.length - 1].timeOfCreation;
+        var transferDate1 = new Date(transferDate * 1000);
+        addPendingTranferToTable.innerHTML += `
+        <tr class="tablerow">
+              <td>${result[result.length - 1].id}</td>
+              <td>${result[result.length - 1].receiver.slice(0, 15) + "..."}</td>
+              <td>${result[result.length - 1].sender.slice(0, 15) + "..."}</td>
+              <td>${result[result.length - 1].amount / 10**18 + " ETH"}</td>
+              <td>${transferDate1.toUTCString()}</td>
+              <td>${result[result - 1].approvals}</td>
+              <td><span>Cancel</span></td>
+              <td><span>Approve</span></td>
+             
+              
+              
+              
+            
+          </tr>`
+    
+      })
+      
+      displayAddOwnerPopup(popupMessage);
+      
+      
+
+  }).on("error", function(error) {
+      console.log("user denied transaction");
+      
+      hideLoader();
+      
+      
+      // $(".loading").hide();
+      
+  })
+
+}
+
+function cancelTransferRequest() {
+
+  loadBlockchainData();
+  var transferId = document.getElementById("cancel-transfer-id-field");
+  
+
+  
+  if (transferId.value == "") {
+    document.getElementById("popup-1").classList.toggle("active");
+    return;
+  }
+  
+
+  const cancelTransferRequest = contractInstance.methods.cancelTransfer(transferId.value).send({from: acc}).on("transactionHash", function(hash) {
+        
+    console.log(hash);
+    loadLoader();
+    
+  })
+  //get confirmation message on confirmation
+  .on("confirmation", function(confirmationNr) {
+      console.log(confirmationNr);
+    
+
+      
+
+  })
+  //get receipt when ransaction is first mined
+  .on("receipt", function(receipt) {
+      console.log(receipt);
+      alert("Transaction successful");
+      hideLoader();
+      var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been canceled";
+
+      displayAddOwnerPopup(popupMessage);
+      
+      
+
+  }).on("error", function(error) {
+      console.log("user denied transaction");
+      
+      hideLoader();
+      
+      
+      // $(".loading").hide();
+      
+  }).then(function(result) {
+      const balance = contractInstance.methods.getTransferRequests().call().then(function(result) {
+      
+      console.log(result);
+
+    })
+  })
+
+}
+
+var transfer = document.getElementById("transfer");
+transfer.onclick = createTransferRequest;
+
+var cancelTransfer = document.getElementById("cancel-transfer");
+cancelTransfer.onclick = cancelTransferRequest;
 
 
 var depositToWallet = document.getElementById("deposit");
@@ -405,12 +613,12 @@ function togglePopup(){
 
 function loadLoader() {
     
-  $(".loading").show();
+  $(".loader-wrapper").show();
 }
 
 function hideLoader() {
     
-  $(".loading").hide();
+  $(".loader-wrapper").fadeOut(1200);
 }
 
 function showDeletePopup() {
@@ -437,7 +645,67 @@ function addUserToWallet(event) {
   const addUserToTable = document.querySelector('tbody');
   console.log(addUserToTable)
    
+
+  const t = document.querySelectorAll("table")[3];
+  console.log("table isss " + t)
+  function ondelete(e) {
+    console.log("made it into f")
+    
+    const bt = e.target;
+    const btn = e.target.id;
+
+    console.log(btn);
+    
+    const cancelTransferRequest = contractInstance.methods.cancelTransfer(btn).send({from: acc}).on("transactionHash", function(hash) {
+        
+      console.log(hash);
+      loadLoader();
+      
+    })
+    //get confirmation message on confirmation
+    .on("confirmation", function(confirmationNr) {
+        console.log(confirmationNr);
+      
+  
+        
+  
+    })
+    //get receipt when ransaction is first mined
+    .on("receipt", function(receipt) {
+        console.log(receipt);
+        alert("Transaction successful");
+        hideLoader();
+        var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been canceled";
+  
+        displayAddOwnerPopup(popupMessage);
+        bt.closest("tr").remove();
+        
+        
+  
+    }).on("error", function(error) {
+        console.log("user denied transaction");
+        
+        hideLoader();
+        
+        
+      
+    }).then(function(result) {
+        const balance = contractInstance.methods.getTransferRequests().call().then(function(result) {
+        
+        console.log(result);
+  
+      })
+    })
+    
+    
+    
+  }
+  t.addEventListener("click", ondelete);
+
+  
   const addDepositToTable = document.querySelectorAll("tbody")[1];
+  const addWithdrawalToTable = document.querySelectorAll("tbody")[2];
+  const addPendingTranferToTable = document.querySelectorAll("tbody")[3];
   var removeUserButton = document.getElementById("remove-user-from-wallet")
   removeUserButton.onclick = removeUser;
 //   text.innerHTML("cool");
@@ -489,7 +757,7 @@ async function getDepositHistroy() {
     "fundsDeposited",
     {fromBlock: 0}
   ).then(function(result) {
-    // console.log(result[0].returnValues.amount)
+    console.log(result[0])
     for (let i = 0; i < result.length; i++) {
       var returnedDepositAmount = result[i].returnValues.amount;
       returnedDepositAmount = returnedDepositAmount / 10 ** 18;
@@ -497,7 +765,7 @@ async function getDepositHistroy() {
       var date1 = new Date(date * 1000);
       // console.log(date1.toUTCString())
       addDepositToTable.innerHTML += `
-          <tr class="tablerow">
+          <tr "class="tablerow">
               <td>${result[i].returnValues.id}</td>
               <td>${returnedDepositAmount + " ETH"}</td>
               <td>${date1.toUTCString()}</td>
@@ -505,10 +773,89 @@ async function getDepositHistroy() {
     }
   
   })
+  
+
+  var withdrawresults = contractInstance.getPastEvents(
+    "fundsWithdrawed",
+    {fromBlock: 0}
+  ).then(function(result) {
+    // console.log(result[0].returnValues.amount)
+    console.log(result[0]);
+    for (let i = 0; i < result.length; i++) {
+      
+      var returnedWithdrawedAmount = result[i].returnValues.amount;
+      returnedWithdrawedAmount = returnedWithdrawedAmount / 10 ** 18;
+      var withdrawDate = result[i].returnValues.timeOfWithdrawal;
+      var withdrawDate1 = new Date(withdrawDate * 1000);
+      // console.log(date1.toUTCString())
+      addWithdrawalToTable.innerHTML += `
+          <tr class="tablerow">
+              <td>${result[i].returnValues.id}</td>
+              <td>${returnedWithdrawedAmount + " ETH"}</td>
+              <td>${withdrawDate1.toUTCString()}</td>
+          </tr>`
+    }
+  
+  })
+
 }
+
+async function pendingTransfers() {
+  const web3 = window.web3
+    
+    var accounts = await web3.eth.getAccounts()
+    
+    a = 30;
+    account = accounts[0].slice(0, 6);
+    acc = accounts[0];
+    
+
+    
+    const networkId = await web3.eth.net.getId()
+    const networkData = data.networks[networkId]
+    if(networkData) {
+      contractInstance = new web3.eth.Contract(data.abi, networkData.address,  {from: acc})
+    //   contractInstance = contractInstance1;
+      
+      
+    } else {
+      window.alert('IPFSViewer contract not deployed to detected network.')
+    }
+
+    const pending = contractInstance.methods.getTransferRequests().call().then(function(result) {
+      console.log(result);
+      for (let i = 0; i < result.length; i++) {
+        var transferDate = result[i].timeOfCreation;
+        var transferDate1 = new Date(transferDate * 1000);
+        addPendingTranferToTable.innerHTML += `
+        <tr onclick="console.log('hello')" id="tablerow">
+              <td id="${result[i].id}">${result[i].id}</td>
+              <td id="${result[i].id}">${result[i].receiver.slice(0, 20) + "..."}</td>
+              <td id="${result[i].id}">${result[i].sender.slice(0, 20) + "..."}</td>
+              <td id="${result[i].id}">${result[i].amount / 10**18 + " ETH"}</td>
+              <td id="${result[i].id}">${transferDate1.toUTCString()}</td>
+              <td id="${result[i].id}">${result[i].approvals}</td>
+              
+             
+              
+              
+              
+            
+          </tr>`
+            
+      }
+    })
+
+  
+
+}
+
 
 loadWeb3();
   
 loadBlockchainData();
 getWalletOwners();
 getDepositHistroy();
+pendingTransfers();
+var cc = document.getElementById("tablerow")
+cc.onclick = console.log("bye");
