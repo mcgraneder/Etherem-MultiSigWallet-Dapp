@@ -30,11 +30,13 @@ async function loadWeb3() {
   async function loadBlockchainData() {
     const web3 = window.web3
     
+    
     var accounts = await web3.eth.getAccounts()
     
     a = 30;
     account = accounts[0].slice(0, 6);
     acc = accounts[0];
+    console.log(acc)
     
     document.getElementById("display-address").innerHTML = "Account: " + acc.slice(0, 6) + "..";
     document.getElementById("display-balance").innerHTML = "balance: 20 ETH";
@@ -613,12 +615,12 @@ function togglePopup(){
 
 function loadLoader() {
     
-  $(".loader-wrapper").show();
+  $(".loading").show();
 }
 
 function hideLoader() {
     
-  $(".loader-wrapper").fadeOut(1200);
+  $(".loading").fadeOut(1200);
 }
 
 function showDeletePopup() {
@@ -635,6 +637,7 @@ console.log(walletOwners);
 
 var form = document.querySelector("form");
 
+
 function addUserToWallet(event) {
   event.preventDeafault();
 }
@@ -648,6 +651,8 @@ function addUserToWallet(event) {
 
   const t = document.querySelectorAll("table")[3];
   console.log("table isss " + t)
+
+
   function ondelete(e) {
     console.log("made it into f")
     
@@ -702,10 +707,118 @@ function addUserToWallet(event) {
   }
   t.addEventListener("click", ondelete);
 
+  function approveTransferRequest(transferId) {
+    loadBlockchainData();
+
+    var transferID = document.getElementById("approve-transfer-field");
+    if(transferID.value =="") {
+      document.getElementById("popup-1").classList.toggle("active");
+      return;
+    }
+
+    const approveTransferRequest = contractInstance.methods.Transferapprove(transferID.value).send({from: acc}).on("transactionHash", function(hash) {  
+      console.log(hash);
+      loadLoader();
+
+    }).on("confirmation", function(confirmationNr) {
+        console.log(confirmationNr);
+
+    }).on("receipt", function(receipt) {
+        console.log(receipt);
+        alert("Transaction successful");
+        hideLoader();
+        var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been approved";
+        
+    }).on("error", function(error) {
+        console.log("user denied transaction");
+        hideLoader();
+    })
+    
+
+  }
+
+  async function getTransferHistroy() {
+    const web3 = window.web3
+      
+      var accounts = await web3.eth.getAccounts()
+      
+      a = 30;
+      account = accounts[0].slice(0, 6);
+      acc = accounts[0];
+      // console.log(account);
+      document.getElementById("display-address").innerHTML = "Account: " + acc.slice(0, 6) + "..";
+      document.getElementById("display-balance").innerHTML = "balance: 20 ETH";
   
+      
+      const networkId = await web3.eth.net.getId()
+      const networkData = data.networks[networkId]
+      if(networkData) {
+        contractInstance = new web3.eth.Contract(data.abi, networkData.address,  {from: acc})
+      //   contractInstance = contractInstance1;
+        
+        
+      } else {
+        window.alert('IPFSViewer contract not deployed to detected network.')
+      }
+  
+    var results = contractInstance.getPastEvents(
+      "transferRequestApproved",
+      {fromBlock: 0}
+    ).then(function(result) {
+      console.log(result)
+      for (let i = 0; i < result.length; i++) {
+        var returnedTransferHistroyAmount = result[i].returnValues.amount;
+        returnedTransferHistroyAmount = returnedTransferHistroyAmount / 10 ** 18;
+        var date = result[i].returnValues.timeOfTransfer;
+        var date1 = new Date(date * 1000);
+        // console.log(date1.toUTCString())
+        addTranferToTable.innerHTML += `
+        <tr onclick="console.log('hello')" id="tablerow">
+              <td id="${result[i].id}">${result[i].returnValues.id}</td>
+              <td id="${result[i].id}">${result[i].returnValues.receiver.slice(0, 20) + "..."}</td>
+              <td id="${result[i].id}">${result[i].returnValues.sender.slice(0, 20) + "..."}</td>
+              <td id="${result[i].id}">${result[i].returnValues.amount / 10**18 + " ETH"}</td>
+              <td id="${result[i].id}">${date1.toUTCString()}</td>
+          </tr>`
+      }
+    
+    })
+
+    var results = contractInstance.getPastEvents(
+      "transferRequestCancelled",
+      {fromBlock: 0}
+    ).then(function(result) {
+      console.log(result)
+      for (let i = 0; i < result.length; i++) {
+        var returnedCancelledTransferHistroyAmount = result[i].returnValues.amount;
+        returnedCancelledTransferHistroyAmount = returnedCancelledTransferHistroyAmount / 10 ** 18;
+        var date = result[i].returnValues.timeOfCancellation;
+        var date1 = new Date(date * 1000);
+        // console.log(date1.toUTCString())
+        addCancelledTranferToTable.innerHTML += `
+        <tr onclick="console.log('hello')" id="tablerow">
+              <td id="${result[i].id}">${result[i].returnValues.id}</td>
+              <td id="${result[i].id}">${result[i].returnValues.receiver.slice(0, 20) + "..."}</td>
+              <td id="${result[i].id}">${result[i].returnValues.sender.slice(0, 20) + "..."}</td>
+              <td id="${result[i].id}">${result[i].returnValues.amount / 10**18 + " ETH"}</td>
+              <td id="${result[i].id}">${date1.toUTCString()}</td>
+          </tr>`
+      }
+    
+    })
+    
+  
+    
+  
+  }
+  
+  const transferApproveButton = document.getElementById("approveTransfer");
+  transferApproveButton.onclick = approveTransferRequest;
   const addDepositToTable = document.querySelectorAll("tbody")[1];
   const addWithdrawalToTable = document.querySelectorAll("tbody")[2];
   const addPendingTranferToTable = document.querySelectorAll("tbody")[3];
+  const addTranferToTable = document.querySelectorAll("tbody")[4];
+  const addCancelledTranferToTable = document.querySelectorAll("tbody")[5];
   var removeUserButton = document.getElementById("remove-user-from-wallet")
   removeUserButton.onclick = removeUser;
 //   text.innerHTML("cool");
@@ -857,5 +970,4 @@ loadBlockchainData();
 getWalletOwners();
 getDepositHistroy();
 pendingTransfers();
-var cc = document.getElementById("tablerow")
-cc.onclick = console.log("bye");
+getTransferHistroy();

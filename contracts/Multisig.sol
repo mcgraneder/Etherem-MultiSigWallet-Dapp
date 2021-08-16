@@ -68,6 +68,8 @@ contract MultiSigWallet {
     event TransferApproved(uint _id);
     // event t(uint id, address sender, address receiver, uint amount, uint timeOfTransfer);
     event transferRequestApproved(uint id, address sender, address receiver, uint amount, uint timeOfTransfer);
+    event transferRequestCancelled(uint id, address sender, address receiver, uint amount, uint timeOfCancellation);
+
     
     
     //add user function. require owner is not already in the wallet array
@@ -171,7 +173,7 @@ contract MultiSigWallet {
 
     function cancelTransfer(uint _id) public {
         require(owners.length >= 1, "need to have more than one signer");
-        require(transferRequests[_id].sender == msg.sender, "only the user who created the transfer can cancel")
+        // require(transferRequests[_id].sender == msg.sender, "only the user who created the transfer can cancel");
 
         uint counter = 0;
         bool hasBeenFound = false;
@@ -184,6 +186,8 @@ contract MultiSigWallet {
         }
         if(hasBeenFound == false) revert();
 
+        emit transferRequestCancelled(transferRequests[_id].id, msg.sender, transferRequests[_id].receiver, transferRequests[_id].amount, block.timestamp);
+
         transferRequests[counter] = transferRequests[transferRequests.length - 1];
         transferRequests.pop();
 
@@ -194,22 +198,37 @@ contract MultiSigWallet {
     
     
     function Transferapprove(uint _id) public onlyOwners {
+
+        uint counter = 0;
+        bool hasBeenFound = false;
+        for(uint i = 0; i < transferRequests.length; i++) {
+           if(transferRequests[i].id == _id) {
+               hasBeenFound = true;
+               break;
+           }
+           counter++;
+        }
+        if(hasBeenFound == false) revert();
+
         require(owners.length >= 1, "need to have more than one signer");
+        require(msg.sender != mainOwner);
         require(approvals[msg.sender][_id] == false, "transaction alrady approved");
-        require(transferRequests[_id].hasBeenSent == false);
+        require(transferRequests[counter].hasBeenSent == false);
+
+        
         
         // if ( transferRequests[_id].approvals => limit){
         //     approvals[msg.sender][_id] = true;
         // }
-        approvals[msg.sender][_id] = true;
-        transferRequests[_id].approvals++;
+        approvals[msg.sender][counter] = true;
+        transferRequests[counter].approvals++;
         
-        emit ApprovalReceived(_id, transferRequests[_id].approvals, msg.sender);
+        emit ApprovalReceived(counter, transferRequests[counter].approvals, msg.sender);
 
-        if(transferRequests[_id].approvals == limit) {
+        if(transferRequests[counter].approvals == limit) {
 
             // emit transferRequestApproved(_id, msg.sender, transferRequests[_id].receiver, transferRequests[_id].amount, block.timestamp);
-            TransferFunds(_id);
+            TransferFunds(counter);
         }
 
         
@@ -231,7 +250,7 @@ contract MultiSigWallet {
         balance[transferRequests[_id].sender] -= transferRequests[_id].amount;
         balance[transferRequests[_id].receiver] += transferRequests[_id].amount;
         
-        emit transferRequestApproved(_id, msg.sender, transferRequests[_id].receiver, transferRequests[_id].amount, block.timestamp);
+        emit transferRequestApproved(transferRequests[_id].id, msg.sender, transferRequests[_id].receiver, transferRequests[_id].amount, block.timestamp);
 
         transferRequests[_id] = transferRequests[transferRequests.length - 1];
         transferRequests.pop();
