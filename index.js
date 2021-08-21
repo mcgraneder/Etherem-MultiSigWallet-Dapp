@@ -68,20 +68,89 @@ async function loadWeb3() {
 
   })
 
+  const owners = contractInstance.methods.getUsers().call().then(function(result) {
+    
+    for (let i = 0; i < result.length; i++) {
+      // addUserToTable.innerHTML += `
+      //     <tr class="tablerow">
+      //         <td id="${result[i]}">${result[i]}</td>
+      //         <td id="${result[i]}">${"Evan McGrane"}</td>
+      //         <td id="${result[i]}"><span>Remove</span></td>
+      //     </tr>`
+          var x = addUserToTable1.insertRow(-1);
+          x.insertCell(0).innerHTML=result[i]
+          x.insertCell(1).innerHTML="Evan McGrane"
+          x.insertCell(2).innerHTML=`<span id="hh">Remove</span>`
+    }
+  })
+
+  var results = contractInstance.getPastEvents(
+    "fundsDeposited",
+    {fromBlock: 0}
+  ).then(function(result) {
+    console.log(result[0])
+    for (let i = 0; i < result.length; i++) {
+      var returnedDepositAmount = result[i].returnValues.amount;
+      returnedDepositAmount = returnedDepositAmount / 10 ** 18;
+      var date = result[i].returnValues.timeOfDeposit;
+      var date1 = new Date(date * 1000);
+      // console.log(date1.toUTCString())
+      addDepositToTable.innerHTML += `
+          <tr "class="tablerow">
+              <td>${result[i].returnValues.id}</td>
+              <td>${returnedDepositAmount + " ETH"}</td>
+              <td>${date1.toUTCString()}</td>
+          </tr>`
+    }
+  
+  })
+  
+
+  var withdrawresults = contractInstance.getPastEvents(
+    "fundsWithdrawed",
+    {fromBlock: 0}
+  ).then(function(result) {
+    // console.log(result[0].returnValues.amount)
+    console.log(result[0]);
+    for (let i = 0; i < result.length; i++) {
+      
+      var returnedWithdrawedAmount = result[i].returnValues.amount;
+      returnedWithdrawedAmount = returnedWithdrawedAmount / 10 ** 18;
+      var withdrawDate = result[i].returnValues.timeOfWithdrawal;
+      var withdrawDate1 = new Date(withdrawDate * 1000);
+      // console.log(date1.toUTCString())
+      addWithdrawalToTable.innerHTML += `
+          <tr class="tablerow">
+              <td>${result[i].returnValues.id}</td>
+              <td>${returnedWithdrawedAmount + " ETH"}</td>
+              <td>${withdrawDate1.toUTCString()}</td>
+          </tr>`
+    }
+  
+  })
+
   }
 
 function addUser(){
 
-    loadBlockchainData();
+    // loadBlockchainData();
+
     
     var addUserNullAddressField = document.getElementById("add-user-address-field");
     var addUserNullNameField = document.getElementById("add-user-name-field");
 
     
+    
+    
     if (addUserNullAddressField.value == "" || addUserNullNameField == "") {
       document.getElementById("popup-1").classList.toggle("active");
       return;
     }
+
+    var walletInfor = {
+      address: addUserNullAddressField.value,
+      name: addUserNullNameField.value,
+    };
 
     var address = document.getElementById("add-user-address-field").value;
     console.log(address);
@@ -121,7 +190,11 @@ function addUser(){
               
             
           </tr>`
-  
+
+          localStorage.setItem("walletInfor", JSON.stringify(walletInfor));
+          const ll = localStorage.getItem("walletinfor");
+          console.log(JSON.parse(ll));
+          console.log("the local storage is" + walletInfor)
 
       }).on("error", function(error) {
           console.log("user denied transaction");
@@ -134,7 +207,7 @@ function addUser(){
 
 function removeUser(){
   
-  loadBlockchainData();
+  
   
   var nullAddressField = document.getElementById("remove-user-address-field");
   var nullNameField = document.getElementById("remove-user-name-field");
@@ -216,19 +289,22 @@ async function getWalletOwners() {
   const owners = contractInstance.methods.getUsers().call().then(function(result) {
     
     for (let i = 0; i < result.length; i++) {
-      addUserToTable.innerHTML += `
-          <tr class="tablerow">
-              <td id="${result[i]}">${result[i]}</td>
-              <td id="${result[i]}">${"Evan McGrane"}</td>
-              <td id="${result[i]}"><span>Remove</span></td>
-          </tr>`
+      // addUserToTable.innerHTML += `
+      //     <tr class="tablerow">
+      //         <td id="${result[i]}">${result[i]}</td>
+      //         <td id="${result[i]}">${"Evan McGrane"}</td>
+      //         <td id="${result[i]}"><span>Remove</span></td>
+      //     </tr>`
+          var x = addUserToTable1.insertRow(-1);
+          x.insertCell(0).innerHTML=result[i]
+          x.insertCell(1).innerHTML="Evan McGrane"
+          x.insertCell(2).innerHTML=`<span id="hh">Remove</span>`
     }
   })
 }
 
 function depositFunds() {
-  loadBlockchainData();
-
+ 
   var nullDepositField = document.getElementById("deposit-field");
   
   if (nullDepositField.value == "") {
@@ -312,7 +388,7 @@ function depositFunds() {
 }
 
 function withdrawFunds() {
-  loadBlockchainData();
+  
 
   var nullWithdrawalField = document.getElementById("withdraw-field");
   
@@ -645,6 +721,7 @@ function addUserToWallet(event) {
   var addUserButton = document.getElementById("add-user-to-wallet");
   addUserButton.onclick = addUser;
 
+  const addUserToTable1 = document.getElementById("owners-table")
   const addUserToTable = document.querySelector('tbody');
   console.log(addUserToTable)
    
@@ -936,7 +1013,8 @@ async function pendingTransfers() {
     }
 
     const pending = contractInstance.methods.getTransferRequests().call().then(function(result) {
-      console.log(result);
+      console.log("here are the pending transfers")
+      console.log(result.length);
       for (let i = 0; i < result.length; i++) {
         var transferDate = result[i].timeOfCreation;
         var transferDate1 = new Date(transferDate * 1000);
@@ -967,7 +1045,7 @@ async function pendingTransfers() {
 loadWeb3();
   
 loadBlockchainData();
-getWalletOwners();
-getDepositHistroy();
+// getWalletOwners();
+// getDepositHistroy();
 pendingTransfers();
 getTransferHistroy();
