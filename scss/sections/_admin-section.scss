@@ -225,3 +225,134 @@ h4 {
     margin-bottom: 25px;
     
 }
+
+
+
+#owners-table {
+  // font-fhttps://www.w3schools.com/amily: Arial, Helvetica, sans-serif;
+  padding: 20px;
+  border-collapse: collapse;
+  width: 100%;
+  color: rgb(159, 161, 170);
+}
+
+#owners-table td, #owners-table th {
+  border: 1px solid rgba(0, 225, 255, 0.979);
+  padding: 8px;
+}
+
+#owners-table tr:nth-child(even){background-color: transparent;}
+
+#owners-table tr:hover {background-color:rgba(19, 226, 233, 0.308);}
+
+#owners-table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: rgba(12, 7, 29, 0.685);
+  color: white;
+}
+
+//   .table {
+//       margin-top: 36px;
+//     //   padding-bottom: 35px;
+//       padding: 0 50px;
+    
+//   }
+
+.table {
+  // margin: 50px;
+  height: auto;
+  padding: 40px 50px;
+
+  // width: 49.5%;
+  color: white;
+  // display: inline-block;
+  background: rgba(19, 15, 41, 0.6);
+  border-radius: 10px;
+  box-shadow: 0 10px 5px #050c20;;
+
+}
+
+.content-table {
+  //   margin: 0 50px;
+    padding: 30px;
+  //   box-shadow: 0 10px 5px #050c20;;
+}
+
+.content-table .heading{
+  margin-bottom: 25px;
+  
+}
+
+
+
+
+
+
+
+#owners-table1 {
+  // font-fhttps://www.w3schools.com/amily: Arial, Helvetica, sans-serif;
+  padding: 20px;
+  border-collapse: collapse;
+  width: 100%;
+  color: rgb(159, 161, 170);
+  table-layout:fixed;
+}
+
+#owners-table1 td, #owners-table1 th {
+  border: 1px solid rgba(0, 225, 255, 0.979);
+  padding: 8px;
+}
+
+#owners-table1 tr:nth-child(even){background-color: transparent;}
+
+#owners-table1 tr:hover {background-color:rgba(19, 226, 233, 0.308);}
+
+#owners-table1 th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: rgba(12, 7, 29, 0.685);
+  color: white;
+}
+
+//   .table {
+//       margin-top: 36px;
+//     //   padding-bottom: 35px;
+//       padding: 0 50px;
+    
+//   }
+
+.table {
+  // margin: 50px;
+  height: auto;
+  padding: 40px 50px;
+  font-size: 15px !important;
+  text-align: left;
+  // width: 49.5%;
+  color: white;
+  // display: inline-block;
+  background: rgba(19, 15, 41, 0.6);
+  border-radius: 10px;
+  box-shadow: 0 10px 5px #050c20;;
+
+}
+
+.content-table {
+  //   margin: 0 50px;
+    padding: 30px;
+  //   box-shadow: 0 10px 5px #050c20;;
+}
+
+.content-table .heading{
+  margin-bottom: 25px;
+  
+}
+
+
+
+
+
+
+//@use ;

@@ -38,7 +38,7 @@
 
     
     <section>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light menu shadow-lg sticky-top">
+    <nav id="nav" class="navbar navbar-expand-lg navbar-light bg-light menu shadow-lg sticky-top">
         <a class="navbar-brand" href="#">MultiSig Wallet</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -49,13 +49,13 @@
                 <a class="nav-link" href="#"><span class="sr-only"></span></a>
                 </li>
                 <li class="nav-item navbar-item">
-                <a class="nav-link" href="#">Admin</a>
+                <a id="toggle-admin-section" class="nav-link" href="#">Admin</a>
                 </li>
                 <li class="nav-item navbar-item">
-                <a class="nav-link" href="#">Accounts</a>
+                <a id="toggle-accounts-section" class="nav-link" href="#">Accounts</a>
                 </li>
                 
-                <li class="nav-item dropdown navbar-item">
+                <li id="toggle-transfer-section" class="nav-item dropdown navbar-item">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Transactions
                 </a>
@@ -93,8 +93,8 @@
     </nav>
 
     
-
-    <section>
+   
+    <section id="admin-section">
     <div class="Containe">
         <div class="heading">
             <h4 class="display-4">Admin</h4>
@@ -143,7 +143,7 @@
                 <h6 class="display-6">Wallet Owners</h6>
             </div>
             <div class="table buttons">
-                <table id="customers">
+                <table id="owners-table">
                     <tbody>
                         <tr>
                             <th>Address</th>
@@ -162,7 +162,7 @@
 
 
     <!-- accounts section -->
-    <section>
+    <section id="accounts-section">
         <div class="Containe">
             <div class="heading">
                 <h4 class="display-4">Accounts</h4>
@@ -211,9 +211,9 @@
                     <h6 class="display-6">Deposit Histroy</h6>
                 </div>
                 <div class="table buttons">
-                    <table id="customers">
-                        <tbody id="deposit-histroy-table">
-                            <tr>
+                    <table class="d" id="customers">
+                        <tbody class="d" id="deposit-histroy-table">
+                            <tr class="d">
                                 <th>TX ID</th>
                                 <th>Amount ETH</th>
                                 <th>Date</th>
@@ -257,7 +257,7 @@
         
 
         <!-- transfer histroy section -->
-        <section>
+        <section id="transfer-section">
             <div class="Containe">
                 <div class="heading">
                     <h4 class="display-4">Transfer Histroy</h4>
@@ -392,7 +392,8 @@
                             
                         
                           </table>
-                    </div>    
+                    </div>   
+                     
                     
                     
                 </div>
@@ -408,6 +409,53 @@
           <div class="close-btn" onclick="togglePopup()">×</div>
           <h1>Title</h1>
           <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo aspernatur laborum rem sed laudantium excepturi veritatis voluptatum architecto, dolore quaerat totam officiis nisi animi accusantium alias inventore nulla atque debitis.</p>
+        </div>
+    </div>
+
+    <div id="loader-11" class="loading loading--full-height" style="display: none;"></div>
+
+  
+      <div class="alert hide">
+         <div class="fas fa-exclamation-circle"></div>
+         <div id="msg" class="msg" ></div>
+         <div id="close-btn" class="close-btn">
+            <div class="fas fa-times"></div>
+         </div>
+      </div>
+
+      <div class="popup2" id="popup-2">
+        <div class="overlay2"></div>
+        <div class="content2">
+          <div class="close-btn2" onclick=togglePopup2()>×</div>
+          <div class="content-table">  
+            <div class="heading">
+                <h6 style="font-size: 30px !important;" id="tx-details" class="display-6"></h6>
+            </div>
+            
+           
+            <div class="table buttons">
+                
+                <table id="owners-table1">
+                   <thead>
+                        <tr>
+                        <th colspan="2">Transaction Details</th>
+                      </tr>
+                   </thead>
+                       
+                    <tbody>
+
+                    </tbody>
+                </table>
+                 
+                  <br>
+                  <div style="text-align: center;"><a style="text-align: center;" href="#">View transaction on Etherscan</a></div>
+                  
+            </div>
+            
+        </div>
+        <div class="popup-buttons-container">
+            <span class="popup-button"id="hh">Approve</span>
+            <span class="popup-button" id="hh">Cancel</span> 
         </div>
     </div>
 
@@ -444,6 +492,18 @@
             document.getElementById("popup-1").classList.toggle("active");
             console.log("hello");
         }
+
+        function togglePopup2(){
+            console.log("clicked")
+            document.getElementById("popup-2").classList.toggle("active");
+            var x = document.getElementById("nav");
+            if (x.style.display === "none") {
+                x.style.display = "flex";
+            } else {
+                x.style.display = "none";
+            }
+           
+        }
     </script>
    
     <script>
@@ -453,6 +513,7 @@
 
         $(window).on("load",function(){
           $(".loader-wrapper").fadeOut(1200);
+          
         });
     </script>
 

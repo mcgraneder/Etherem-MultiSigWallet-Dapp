@@ -46,6 +46,7 @@ contract MultiSigWallet {
     mapping(address => mapping(uint => bool)) public approvals;
     //balance mapping which maps user address ot their account balance
     mapping(address => uint) public balance;
+    mapping(address => uint) public reservedBalance;
     
     //modifier which we can lace in function definitions to restrict access of that 
     //function to the wallet owners
@@ -125,6 +126,7 @@ contract MultiSigWallet {
         // require(owners.length > 1, "need to have more than one signer");
     
         balance[msg.sender] += msg.value;
+        reservedBalance[msg.sender] += msg.value;
         emit fundsDeposited(msg.sender, depositId, msg.value, block.timestamp);
         depositId++;
     }
@@ -152,8 +154,11 @@ contract MultiSigWallet {
     
     //Create an instance of the Transfer struct and add it to the transferRequests array
     function createTransfer(uint _amount, address payable _receiver) public onlyOwners {
+        require(balance[msg.sender] >= _amount);
         require(owners.length >= 1, "need to have more than one signer");
         //require(msg.sender != _receiver);
+        reservedBalance[msg.sender] -= _amount;
+
         for (uint i = 0; i < owners.length; i++)
         {
             require(owners[i] != _receiver);
@@ -186,7 +191,8 @@ contract MultiSigWallet {
         }
         if(hasBeenFound == false) revert();
 
-        emit transferRequestCancelled(transferRequests[_id].id, msg.sender, transferRequests[_id].receiver, transferRequests[_id].amount, block.timestamp);
+        reservedBalance[msg.sender] += transferRequests[counter].amount;
+        emit transferRequestCancelled(transferRequests[counter].id, msg.sender, transferRequests[counter].receiver, transferRequests[counter].amount, block.timestamp);
 
         transferRequests[counter] = transferRequests[transferRequests.length - 1];
         transferRequests.pop();
@@ -262,7 +268,7 @@ contract MultiSigWallet {
     //update amount after transfer function.
     function withdraw(uint _amount) public onlyOwners returns (uint)
     {
-       
+        require(reservedBalance[msg.sender] >= _amount);
         require(balance[msg.sender] >= _amount);
         
         payable(msg.sender).transfer(_amount);
