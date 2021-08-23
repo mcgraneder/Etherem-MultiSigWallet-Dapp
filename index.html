@@ -55,15 +55,13 @@
                 <a id="toggle-accounts-section" class="nav-link" href="#">Accounts</a>
                 </li>
                 
-                <li id="toggle-transfer-section" class="nav-item dropdown navbar-item">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Transactions
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li class="nav-item navbar-item">
+                    <a id="toggle-transfer-section" class="nav-link" href="#">Transactions</a>
+                <!-- <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                     <a class="dropdown-item" href="#">Action</a>
                     <a class="dropdown-item" href="#">Another action</a>
                     <a class="dropdown-item" href="#">Something else here</a>
-                </div>
+                </div> -->
                 </li>
             </ul>
         </div>
@@ -211,7 +209,7 @@
                     <h6 class="display-6">Deposit Histroy</h6>
                 </div>
                 <div class="table buttons">
-                    <table class="d" id="customers">
+                    <table class="deposit-detail-table" id="customers">
                         <tbody class="d" id="deposit-histroy-table">
                             <tr class="d">
                                 <th>TX ID</th>
@@ -235,7 +233,7 @@
                     <h6 class="display-6">Withdrawal Histroy</h6>
                 </div>
                 <div class="table buttons">
-                    <table id="customers">
+                    <table class="withdrawal-detail-table" id="customers">
                         <tbody id="withdraw-histroy-table">
                             <tr>
                                 <th>TX ID</th>
@@ -348,7 +346,7 @@
                         <h6 class="display-6">Transfers Histroy</h6>
                     </div>
                     <div class="table buttons">
-                        <table id="customers">
+                        <table class="transfer-detail-table" id="customers">
                             <tbody id="transfer-histroy-table">
                                 <tr>
                                     <th>TX ID</th>
@@ -375,7 +373,7 @@
                         <h6 class="display-6">Canceled Tranfers</h6>
                     </div>
                     <div class="table buttons">
-                        <table id="customers">
+                        <table class="cancelled-transfer-detail-table" id="customers">
                             <tbody id="cancelled-transfers-table">
                                 <tr>
                                     <th>TX ID</th>
@@ -415,13 +413,13 @@
     <div id="loader-11" class="loading loading--full-height" style="display: none;"></div>
 
   
-      <div class="alert hide">
+      <!-- <div class="alert hide">
          <div class="fas fa-exclamation-circle"></div>
          <div id="msg" class="msg" ></div>
          <div id="close-btn" class="close-btn">
             <div class="fas fa-times"></div>
          </div>
-      </div>
+      </div> -->
 
       <div class="popup2" id="popup-2">
         <div class="overlay2"></div>
@@ -448,7 +446,7 @@
                 </table>
                  
                   <br>
-                  <div style="text-align: center;"><a style="text-align: center;" href="#">View transaction on Etherscan</a></div>
+                  <div id="etherscan-link" style="text-align: center;"></div>
                   
             </div>
             
@@ -469,6 +467,8 @@
             <div class="fas fa-times"></div>
          </div>
       </div>
+
+      
       
 
 
