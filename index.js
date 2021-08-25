@@ -1,9 +1,10 @@
 import data from './build/contracts/MultiSigWallet.json' assert { type: "json" };
-
+//0x9Dad734fEC00e2b1aE42DFA2eaf26a40eE31aFB1
 var acc = "";
 var account = "";
 var contractInstance = "";
-
+//fix contract to make events time the same name
+//fix line 598 have result of id be the index not tx id
 //connect browser to blockchain through metamask
 async function loadWeb3() {
     if (window.ethereum) {
@@ -38,11 +39,7 @@ async function loadWeb3() {
     } else {
       window.alert('IPFSViewer contract not deployed to detected network.')
     }
-    const balance = contractInstance.methods.getAccountBalance().call().then(function(balance) {
-      balance = balance / 10 ** 18;
-      balance = balance.toFixed(2)
-      document.getElementById("display-balance").innerHTML = "balance: " + balance + " ETH";
-  })
+  displayBalance();
   document.getElementById("display-wallet-id").innerHTML = "Wallet ID: 1";
 
   const owners = contractInstance.methods.getUsers().call().then(function(result) {
@@ -56,70 +53,118 @@ async function loadWeb3() {
     }
   })
 
-  var results = contractInstance.getPastEvents(
-    "fundsDeposited",
-    {fromBlock: 0}
-  ).then(function(result) {
-    for (let i = 0; i < result.length; i++) {
-      var returnedDepositAmount = result[i].returnValues.amount;
-      returnedDepositAmount = returnedDepositAmount / 10 ** 18;
-      var date = result[i].returnValues.timeOfDeposit;
-      var date1 = new Date(date * 1000);
-      addDepositToTable.innerHTML += `
-          <tr "class="tablerow">
-              <td id=${result[i].returnValues.id}>${result[i].returnValues.id}</td>
-              <td id=${result[i].returnValues.id}>${returnedDepositAmount + " ETH"}</td>
-              <td id=${result[i].returnValues.id}>${date1.toUTCString()}</td>
-          </tr>`
-    }
-  })
+  loadAdminTables("fundsDeposited")
+  loadAdminTables("fundsWithdrawed")
+  loadAccountsTables("transferRequestApproved")
+  loadAccountsTables("transferRequestCancelled")
   
-  var withdrawresults = contractInstance.getPastEvents(
-    "fundsWithdrawed",
-    {fromBlock: 0}
-  ).then(function(result) {
-    for (let i = 0; i < result.length; i++) {
-      var returnedWithdrawedAmount = result[i].returnValues.amount;
-      returnedWithdrawedAmount = returnedWithdrawedAmount / 10 ** 18;
-      var withdrawDate = result[i].returnValues.timeOfWithdrawal;
-      var withdrawDate1 = new Date(withdrawDate * 1000);
-      addWithdrawalToTable.innerHTML += `
-          <tr class="tablerow">
-              <td id=${result[i].returnValues.id}>${result[i].returnValues.id}</td>
-              <td id=${result[i].returnValues.id}>${returnedWithdrawedAmount + " ETH"}</td>
-              <td id=${result[i].returnValues.id}>${withdrawDate1.toUTCString()}</td>
-          </tr>`
-    }
-  })
-
   const pending = contractInstance.methods.getTransferRequests().call().then(function(result) {
     for (let i = 0; i < result.length; i++) {
-      var transferDate = result[i].timeOfCreation;
+      var transferDate = result[i].timeStamp;
       var transferDate1 = new Date(transferDate * 1000);
       addPendingTranferToTable.innerHTML += `
       <tr id="tablerow">
+            <td id="${result[i].id}">${result[i].ticker}</td>
             <td id="${result[i].id}">${result[i].id}</td>
             <td id="${result[i].id}">${result[i].receiver.slice(0, 20) + "..."}</td>
             <td id="${result[i].id}">${result[i].sender.slice(0, 20) + "..."}</td>
-            <td id="${result[i].id}">${result[i].amount / 10**18 + " ETH"}</td>
+            <td id="${result[i].id}">${result[i].amount / 10**18 + currentSelectedToken}</td>
             <td id="${result[i].id}">${transferDate1.toUTCString()}</td>
             <td id="${result[i].id}">${result[i].approvals}</td> 
         </tr>`    
     }
   })
 
+  console.log(currentSelectedToken)
+  
+}
+
+var currentSelectedToken = "ETH"
+const ERC20TokenMenu = document.getElementById("ERC20-token-menu")
+ETH.onclick = function() {
+  ERC20TokenMenu.innerHTML = "ETH"
+  currentSelectedToken = "ETH"
+  displayBalance()
+}
+LINK.onclick = function() {
+  ERC20TokenMenu.innerHTML = "LINK"
+  currentSelectedToken = "LINK"
+  displayBalance()
+
+}
+UNI.onclick = function() {
+  ERC20TokenMenu.innerHTML = "UNI"
+  currentSelectedToken = "UNI"
+  displayBalance()
+
+}
+BNB.onclick = function() {
+  ERC20TokenMenu.innerHTML = "BNB"
+  currentSelectedToken = "BNB"
+  displayBalance()
+
+}
+VET.onclick = function() {
+  ERC20TokenMenu.innerHTML = "VET"
+  currentSelectedToken = "VET"
+  displayBalance()
+
+}
+
+function displayBalance() {
+  const balance = contractInstance.methods.getAccountBalance(currentSelectedToken).call().then(function(balance) {
+    balance = balance / 10 ** 18;
+    balance = balance.toFixed(4)
+    document.getElementById("display-balance").innerHTML = "balance: " + balance + currentSelectedToken;
+  })
+}
+
+function loadAdminTables(tableName) {
+
+  var table;
+  if(tableName == "fundsDeposited") table = addDepositToTable;
+  else if(tableName == "fundsWithdrawed") table = addWithdrawalToTable
+  
   var results = contractInstance.getPastEvents(
-    "transferRequestApproved",
+    tableName,
+    {fromBlock: 0}
+  ).then(function(result) {
+    for (let i = 0; i < result.length; i++) {
+      var amount = result[i].returnValues.amount;
+      amount = amount / 10 ** 18;
+      var date = result[i].returnValues.timeStamp;//change contract to time in both withdraw and deoposit event
+      var date1 = new Date(date * 1000);
+      table.innerHTML += `
+          <tr "class="tablerow">
+              <td id=${result[i].returnValues.id}>${result[i].returnValues.ticker}</td>
+              <td id=${result[i].returnValues.id}>${result[i].returnValues.id}</td>
+              <td id=${result[i].returnValues.id}>${result[i].returnValues.from}</td>
+              <td id=${result[i].returnValues.id}>${returnedDepositAmount + " ETH"}</td>
+              <td id=${result[i].returnValues.id}>${date1.toUTCString()}</td>
+          </tr>`
+    }
+  })
+}
+
+function loadAccountsTables(tableName) {
+
+  var table;
+  if(tableName == "transferRequestApproved") table = addTranferToTable;
+  else if(tableName == "transferRequestCancelled") table = addCancelledTranferToTable
+
+  var results = contractInstance.getPastEvents(
+    tableName,
     {fromBlock: 0}
   ).then(function(result) {
     console.log(result)
     for (let i = 0; i < result.length; i++) {
-      var returnedTransferHistroyAmount = result[i].returnValues.amount;
-      returnedTransferHistroyAmount = returnedTransferHistroyAmount / 10 ** 18;
-      var date = result[i].returnValues.timeOfTransfer;
+      var amount = result[i].returnValues.amount;
+      amount = amount / 10 ** 18;
+      var date = result[i].returnValues.timeStamp;
       var date1 = new Date(date * 1000);
-      addTranferToTable.innerHTML += `
+      table.innerHTML += `
       <tr onclick="console.log('hello')" id="tablerow">
+            <td id="${result[i].returnValues.id}">${result[i].returnValues.ticker}</td>
             <td id="${result[i].returnValues.id}">${result[i].returnValues.id}</td>
             <td id="${result[i].returnValues.id}">${result[i].returnValues.receiver.slice(0, 20) + "..."}</td>
             <td id="${result[i].returnValues.id}">${result[i].returnValues.sender.slice(0, 20) + "..."}</td>
@@ -128,31 +173,9 @@ async function loadWeb3() {
         </tr>`
     }
   })
-
-  var results = contractInstance.getPastEvents(
-    "transferRequestCancelled",
-    {fromBlock: 0}
-  ).then(function(result) {
-    for (let i = 0; i < result.length; i++) {
-      var returnedCancelledTransferHistroyAmount = result[i].returnValues.amount;
-      returnedCancelledTransferHistroyAmount = returnedCancelledTransferHistroyAmount / 10 ** 18;
-      var date = result[i].returnValues.timeOfCancellation;
-      var date1 = new Date(date * 1000);
-      addCancelledTranferToTable.innerHTML += `
-      <tr onclick="console.log('hello')" id="${result[i].id}">
-            <td id="${result[i].returnValues.id}">${result[i].returnValues.id}</td>
-            <td id="${result[i].returnValues.id}">${result[i].returnValues.receiver.slice(0, 20) + "..."}</td>
-            <td id="${result[i].returnValues.id}">${result[i].returnValues.sender.slice(0, 20) + "..."}</td>
-            <td id="${result[i].returnValues.id}">${result[i].returnValues.amount / 10**18 + " ETH"}</td>
-            <td id="${result[i].returnValues.id}">${date1.toUTCString()}</td>
-        </tr>`
-    }
-  })
-
-  }
-
+}
 function addUser(){
-
+    console.log(currentSelectedToken)
     var addUserNullAddressField = document.getElementById("add-user-address-field");
     var addUserNullNameField = document.getElementById("add-user-name-field");
 
@@ -161,21 +184,12 @@ function addUser(){
       return;
     }
 
-    var walletInfor = {
-      address: addUserNullAddressField.value,
-      name: addUserNullNameField.value,
-    };
-
-    const addUser = contractInstance.methods.addUsers(addUserNullAddressField.value).send({from: acc}).on("transactionHash", function(hash) {
+    contractInstance.methods.addUsers(addUserNullAddressField.value).send({from: acc}).on("transactionHash", function(hash) {
           loadLoader();  
-      })
-      //get confirmation message on confirmation
-      .on("confirmation", function(confirmationNr) {
-          console.log(confirmationNr);
-      })
+    })
       //get receipt when ransaction is first mined
       .on("receipt", function(receipt) {
-          alert("Transaction successful");
+          
           hideLoader();
           var popupMessage = document.getElementById("msg").innerHTML = "Wallet owner has been added";
           displayAddOwnerPopup(popupMessage);
@@ -216,13 +230,9 @@ async function removeUser(){
   const removeUser = contractInstance.methods.removeUser(nullAddressField.value).send({from: acc}).on("transactionHash", function(hash) {
         loadLoader();  
     })
-    //get confirmation message on confirmation
-    .on("confirmation", function(confirmationNr) {
-        console.log(confirmationNr);
-    })
     //get receipt when ransaction is first mined
     .on("receipt", function(receipt) {
-        alert("Transaction successful");
+       
         hideLoader();
         var popupMessage = document.getElementById("msg").innerHTML = "Wallet owner has been removed";
         displayAddOwnerPopup(popupMessage);
@@ -233,64 +243,56 @@ async function removeUser(){
 }
 
 
-function depositFunds() {
- 
+function depositFunds(token) {
+  console.log(token)
   var nullDepositField = document.getElementById("deposit-field");
   
   if (nullDepositField.value == "") {
     document.getElementById("popup-1").classList.toggle("active");
     return;
   }
-
-  var value = {
-    value: web3.utils.toWei(String(nullDepositField.value), "ether"),
-    from: acc 
-  };
-
-  var dep = contractInstance.methods.deposit().send(value).on("transactionHash", function(hash) {   
-    loadLoader();
-    
-  })
-  //get confirmation message on confirmation
-  .on("confirmation", function(confirmationNr) {
-      console.log(confirmationNr);
-  })
-  //get receipt when ransaction is first mined
-  .on("receipt", function(receipt) {
-      alert("Transaction successful");
-      hideLoader();
-      var popupMessage = document.getElementById("msg").innerHTML = "Deposit successful! Balance has been updated";
-      displayAddOwnerPopup(popupMessage);
-
-  }).on("error", function(error) {
-      hideLoader();
-      
-  }).then(function(result) {
-      const balance = contractInstance.methods.getAccountBalance().call().then(function(balance) {
-      balance = balance / 10 ** 18;
-      balance = balance.toFixed(3)
-      document.getElementById("display-balance").innerHTML = "balance: " + balance + " ETH";
-    })
-  })
   
-  contractInstance.once('fundsDeposited', 
-        {
-        filter: { player: acc },
-        fromBlock: 'latest'
-        }, (error, event) => {
-        if(error) throw("Error fetching events");
-        var date = event.returnValues.timeOfDeposit;
-        var date1 = new Date(date * 1000);
-        var returnedDepositAmount = event.returnValues.amount;
-        returnedDepositAmount = returnedDepositAmount / 10 ** 18;
-        addDepositToTable.innerHTML += `
-          <tr class="tablerow">
-              <td id=${event.returnValues.id}>${event.returnValues.id}</td>
-              <td id=${event.returnValues.id}>${returnedDepositAmount + " ETH"}</td>
-              <td id=${event.returnValues.id}>${date1.toUTCString()}</td>
-          </tr>`
-      })
-
+  if(currentSelectedToken == "ETH") {
+    console.log("made ti")
+    var dep = contractInstance.methods.deposit().send({value: web3.utils.toWei(String(nullDepositField.value), "ether"), from: acc}).on("transactionHash", function(hash) {   
+      loadLoader();
+      
+    })
+    //get receipt when ransaction is first mined
+    .on("receipt", function(receipt) {
+        
+        hideLoader();
+        var popupMessage = document.getElementById("msg").innerHTML = "Deposit successful! Balance has been updated";
+        displayAddOwnerPopup(popupMessage);
+  
+    }).on("error", function(error) {
+        hideLoader();
+        
+    }).then(function(result) {
+        displayBalance()
+    })
+  }
+  else {
+    var dep = contractInstance.methods.depositERC20Token(web3.utils.toWei(String(nullDepositField.value), "ether"), currentSelectedToken).send({from: acc}).on("transactionHash", function(hash) {   
+      loadLoader();
+      
+    })
+    //get receipt when ransaction is first mined
+    .on("receipt", function(receipt) {
+        
+        hideLoader();
+        var popupMessage = document.getElementById("msg").innerHTML = "Deposit successful! Balance has been updated";
+        displayAddOwnerPopup(popupMessage);
+  
+    }).on("error", function(error) {
+        hideLoader();
+        
+    }).then(function(result) {
+        displayBalance()
+    })
+  }
+  
+  updateAdminTables("fundsDeposited")
 }
 
 function withdrawFunds() {
@@ -302,46 +304,72 @@ function withdrawFunds() {
     return;
   }
 
-  var dep = contractInstance.methods.withdraw(web3.utils.toWei(String(nullWithdrawalField.value), "ether")).send().on("transactionHash", function(hash) {
-    loadLoader();
-  })
-  //get confirmation message on confirmation
-  .on("confirmation", function(confirmationNr) {
-      console.log(confirmationNr);
-  })
-  //get receipt when ransaction is first mined
-  .on("receipt", function(receipt) {
-      alert("Transaction successful");
-      hideLoader();
-      var popupMessage = document.getElementById("msg").innerHTML = "Withdrawal successful! balance has been updated";
-      displayAddOwnerPopup(popupMessage);
+  if(currentSelectedToken == "ETH") {
+    var dep = contractInstance.methods.withdraw().send(web3.utils.toWei(String(nullWithdrawalField.value), "ether"), {from: acc}).on("transactionHash", function(hash) {   
+      loadLoader();
       
-  }).on("error", function(error) {
-      hideLoader();
-      
-  }).then(function(result) {
-      const balance = contractInstance.methods.getAccountBalance().call().then(function(balance) {
-      balance = balance / 10 ** 18;
-      balance = balance.toFixed(3)
-      document.getElementById("display-balance").innerHTML = "balance: " + balance + " ETH";
     })
-  })
+    //get receipt when ransaction is first mined
+    .on("receipt", function(receipt) {
+        
+        hideLoader();
+        var popupMessage = document.getElementById("msg").innerHTML = "Withdrawal successful! Balance has been updated";
+        displayAddOwnerPopup(popupMessage);
+  
+    }).on("error", function(error) {
+        hideLoader();
+        
+    }).then(function(result) {
+        displayBalance()
+    })
+  }
+  else {
+    var dep = contractInstance.methods.withdrawERC20Token(web3.utils.toWei(String(nullDepositField.value), "ether"), currentSelectedToken).send({from: acc}).on("transactionHash", function(hash) {   
+      loadLoader();
+      
+    })
+    //get receipt when ransaction is first mined
+    .on("receipt", function(receipt) {
+        
+        hideLoader();
+        var popupMessage = document.getElementById("msg").innerHTML = "Withdrawal successful! Balance has been updated";
+        displayAddOwnerPopup(popupMessage);
+  
+    }).on("error", function(error) {
+        hideLoader();
+        
+    }).then(function(result) {
+        displayBalance()
+    })
+  }
+  
 
-  contractInstance.once('fundsWithdrawed', 
+  updateAdminTables("fundsWithdrawed")
+}
+
+function updateAdminTables(eventName) {
+
+  var table;
+  if(eventName == "fundsDeposited") table = addDepositToTable
+  else if(eventName == "fundsWithdrawed") table = addWithdrawalToTable
+
+  contractInstance.once(eventName, 
         {
         filter: { player: acc },
         fromBlock: 'latest'
         }, (error, event) => {
         if(error) throw("Error fetching events");
-        var withdrawDate = event.returnValues.timeOfWithdrawal;
-        var withdrawDate1 = new Date(withdrawDate * 1000);
-        var returnedWithdrawedAmount = event.returnValues.amount;
-        returnedWithdrawedAmount = returnedWithdrawedAmount / 10 ** 18;
-        addWithdrawalToTable.innerHTML += `
+        var date = event.returnValues.timeStamp;
+        var date1 = new Date(date * 1000);
+        var amount = event.returnValues.amount;
+        amount = amount / 10 ** 18;
+        table.innerHTML += `
           <tr class="tablerow">
+              <td id=${event.returnValues.id}>${event.returnValues.ticker}</td>
               <td id=${event.returnValues.id}>${event.returnValues.id}</td>
-              <td id=${event.returnValues.id}>${returnedWithdrawedAmount + " ETH"}</td>
-              <td id=${event.returnValues.id}>${withdrawDate1.toUTCString()}</td>
+              <td id=${event.returnValues.id}>${event.returnValues.from}</td>
+              <td id=${event.returnValues.id}>${returnedDepositAmount + " ETH"}</td>
+              <td id=${event.returnValues.id}>${date1.toUTCString()}</td>
           </tr>`
       })
 }
@@ -356,32 +384,30 @@ function createTransferRequest() {
     return;
   }
   
-  const createTransferRequest = contractInstance.methods.createTransfer(web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress.value).send({from: acc}).on("transactionHash", function(hash) {
+  const createTransferRequest = contractInstance.methods.createTransfer(currentSelectedToken, web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress.value).send({from: acc}).on("transactionHash", function(hash) {
     loadLoader();
-  })
-  //get confirmation message on confirmation
-  .on("confirmation", function(confirmationNr) {
-      console.log(confirmationNr); 
   })
   //get receipt when ransaction is first mined
   .on("receipt", function(receipt) {
-      alert("Transaction successful");
+     
       hideLoader();
       var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been created";
       const pendingTranfer = contractInstance.methods.getTransferRequests().call().then(function(result) {
-        var transferDate = result[result.length - 1].timeOfCreation;
-        var transferDate1 = new Date(transferDate * 1000);
+        var Date = result[result.length - 1].timeStamp;
+        var Date1 = new Date(Date * 1000);
         addPendingTranferToTable.innerHTML += `
         <tr class="tablerow">
+              <td>${result[result.length - 1].ticker}</td>
               <td>${result[result.length - 1].id}</td>
               <td>${result[result.length - 1].receiver.slice(0, 15) + "..."}</td>
               <td>${result[result.length - 1].sender.slice(0, 15) + "..."}</td>
               <td>${result[result.length - 1].amount / 10**18 + " ETH"}</td>
-              <td>${transferDate1.toUTCString()}</td>
+              <td>${Date1.toUTCString()}</td>
               <td>${result[result.length - 1].approvals}</td>
           </tr>`
       })
       displayAddOwnerPopup(popupMessage);
+      displayBalance()
     
   }).on("error", function(error) {
       hideLoader();
@@ -400,16 +426,12 @@ async function cancelTransferRequest(id) {
   }
   id = transferId.value
   
-  const cancelTransferRequest = await contractInstance.methods.cancelTransfer(id).send({from: acc}).on("transactionHash", function(hash) {
+  const cancelTransferRequest = await contractInstance.methods.cancelTransfer(currentSelectedToken, id).send({from: acc}).on("transactionHash", function(hash) {
     loadLoader();
-  })
-  //get confirmation message on confirmation
-  .on("confirmation", function(confirmationNr) {
-      console.log(confirmationNr);
   })
   //get receipt when ransaction is first mined
   .on("receipt", function(receipt) {
-      alert("Transaction successful");
+      
       hideLoader();
       var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been canceled";
       displayAddOwnerPopup(popupMessage);
@@ -434,12 +456,13 @@ async function cancelTransferRequest(id) {
             "transferRequestCancelled",
             {fromBlock: 0}
           ).then(function(result) {
-            var returnedTransferHistroyAmount = result[result.length - 1].returnValues.amount;
-            returnedTransferHistroyAmount = returnedTransferHistroyAmount / 10 ** 18;
-            var date = result[result.length - 1].returnValues.timeOfTransfer;
+            var amount = result[result.length - 1].returnValues.amount;
+          aAmount = amount / 10 ** 18;
+            var date = result[result.length - 1].returnValues.timeStamp;
             var date1 = new Date(date * 1000);
             addCancelledTranferToTable.innerHTML += `
                 <tr onclick="console.log('hello')" id="tablerow">
+                      <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.ticker}</td>
                       <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.id}</td>
                       <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.receiver.slice(0, 20) + "..."}</td>
                       <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.sender.slice(0, 20) + "..."}</td>
@@ -465,16 +488,12 @@ function removeTransferRequestOnCancellation(e) {
   togglePopup2()
   const bt = e.target;
   const btn = e.target.id;
-  const cancelTransferRequest = contractInstance.methods.cancelTransfer(btn).send({from: acc}).on("transactionHash", function(hash) {
+  const cancelTransferRequest = contractInstance.methods.cancelTransfer(currentSelectedToken, btn).send({from: acc}).on("transactionHash", function(hash) {
     loadLoader();
-  })
-  //get confirmation message on confirmation
-  .on("confirmation", function(confirmationNr) {
-      console.log(confirmationNr);
   })
   //get receipt when ransaction is first mined
   .on("receipt", function(receipt) {
-      alert("Transaction successful");
+     
       hideLoader();
       var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been canceled";
       displayAddOwnerPopup(popupMessage);
@@ -497,12 +516,13 @@ function removeTransferRequestOnCancellation(e) {
             "transferRequestCancelled",
             {fromBlock: 0}
           ).then(function(result) {
-            var returnedTransferHistroyAmount = result[result.length - 1].returnValues.amount;
-            returnedTransferHistroyAmount = returnedTransferHistroyAmount / 10 ** 18;
-            var date = result[result.length - 1].returnValues.timeOfTransfer;
+            var amountmount = result[result.length - 1].returnValues.amount;
+            amountmount = amountmount / 10 ** 18;
+            var date = result[result.length - 1].returnValues.timeStamp;
             var date1 = new Date(date * 1000);
             addCancelledTranferToTable.innerHTML += `
                 <tr onclick="console.log('hello')" id="tablerow">
+                      <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.ticker}</td>
                       <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.id}</td>
                       <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.receiver.slice(0, 20) + "..."}</td>
                       <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.sender.slice(0, 20) + "..."}</td>
@@ -529,9 +549,7 @@ async function removeWallletOwner(e) {
   const btn = e.target.id;
   var counter = 1;
   await contractInstance.methods.getUsers().call().then(function(transferss) {
-    // console.log(transferss)
     for (let i = 0; i < transferss.length; i++) {
-
       if (transferss[i] == btn) {
          break;
       }
@@ -542,13 +560,9 @@ async function removeWallletOwner(e) {
   const removeUser = contractInstance.methods.removeUser(btn).send({from: acc}).on("transactionHash", function(hash) {
         loadLoader();  
     })
-    //get confirmation message on confirmation
-    .on("confirmation", function(confirmationNr) {
-        console.log(confirmationNr);
-    })
     //get receipt when ransaction is first mined
     .on("receipt", function(receipt) {
-        alert("Transaction successful");
+       
         hideLoader();
         var popupMessage = document.getElementById("msg").innerHTML = "Wallet owner has been removed";
         displayAddOwnerPopup(popupMessage);
@@ -572,7 +586,7 @@ const CancelledTransferInfo = document.querySelectorAll("table")[5];
 CancelledTransferInfo.addEventListener("click", showTxInformation);
 
 async function showTxInformation(e) {
-  
+  //do something with counter to get id
   var div = document.getElementById("etherscan-link")
   var etherscanLink = document.createElement("a")
   etherscanLink.setAttribute('target', "_blank")
@@ -608,6 +622,7 @@ async function showTxInformation(e) {
     eventName,
     {fromBlock: 0}
   ).then(function(result) {
+    console.log(result)
     etherscanLink.setAttribute('href', "https://rinkeby.etherscan.io//tx/"+`${result[id].transactionHash}`)
     div.appendChild(etherscanLink)
     var tx = web3.eth.getTransaction(result[id].transactionHash).then(function(gas) {
@@ -657,14 +672,14 @@ async function approveTransferRequest(transferId) {
     return;
   }
   
-  const approveTransferRequest = await contractInstance.methods.Transferapprove(transferID.value).send({from: acc}).on("transactionHash", function(hash) {  
+  const approveTransferRequest = await contractInstance.methods.Transferapprove(currentSelectedToken, transferID.value).send({from: acc}).on("transactionHash", function(hash) {  
     loadLoader();
 
   }).on("confirmation", function(confirmationNr) {
       console.log(confirmationNr);
 
   }).on("receipt", function(receipt) {
-      alert("Transaction successful");
+    
       hideLoader();
       var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been approved";
       displayAddOwnerPopup(popupMessage);
@@ -701,12 +716,13 @@ async function approveTransferRequest(transferId) {
               counter++
             }
             
-            var returnedTransferHistroyAmount = result[result.length - 1].returnValues.amount;
-            returnedTransferHistroyAmount = returnedTransferHistroyAmount / 10 ** 18;
-            var date = result[result.length - 1].returnValues.timeOfTransfer;
+            var amount = result[result.length - 1].returnValues.amount;
+            amount = amount / 10 ** 18;
+            var date = result[result.length - 1].returnValues.timeStamp;
             var date1 = new Date(date * 1000);
             addTranferToTable.innerHTML += `
                 <tr onclick="console.log('hello')" id="tablerow">
+                      <td id="${result[result.length - 1].returnValues.id}">${result[result.length - 1].returnValues.ticker}</td>
                       <td id="${result[result.length - 1].returnValues.id}">${result[result.length - 1].returnValues.id}</td>
                       <td id="${result[result.length - 1].returnValues.id}">${result[result.length - 1].returnValues.receiver.slice(0, 20) + "..."}</td>
                       <td id="${result[result.length - 1].returnValues.id}">${result[result.length - 1].returnValues.sender.slice(0, 20) + "..."}</td>

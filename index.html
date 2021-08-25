@@ -63,6 +63,18 @@
                     <a class="dropdown-item" href="#">Something else here</a>
                 </div> -->
                 </li>
+                <li class="nav-item dropdown">
+                    <a id="ERC20-token-menu" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Dropdown
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <a  id="ETH" class="dropdown-item" href="#">ETH</a>
+                      <a  id="LINK" class="dropdown-item" href="#">LINK</a>
+                      <a  id="UNI" class="dropdown-item" href="#">UNI</a>
+                      <a  id="VET" class="dropdown-item" href="#">VET</a>
+                      <a id="BNB" class="dropdown-item" href="#">BNB</a>
+                    </div>
+                  </li>
             </ul>
         </div>
         <div class="collapse navbar-collapse justify-content-end balances" id="navbarNavDropdown">
@@ -140,7 +152,7 @@
             <div class="heading">
                 <h6 class="display-6">Wallet Owners</h6>
             </div>
-            <div class="table buttons">
+            <div style="overflow-x: auto;" class="table buttons">
                 <table id="owners-table">
                     <tbody>
                         <tr>
@@ -208,12 +220,14 @@
                 <div class="heading">
                     <h6 class="display-6">Deposit Histroy</h6>
                 </div>
-                <div class="table buttons">
+                <div style="overflow-x: auto;" class="table buttons">
                     <table class="deposit-detail-table" id="customers">
                         <tbody class="d" id="deposit-histroy-table">
                             <tr class="d">
+                                <th>Token</th>
                                 <th>TX ID</th>
-                                <th>Amount ETH</th>
+                                <th>Deposited By</th>
+                                <th>Amount</th>
                                 <th>Date</th>
                                 
                               </tr>
@@ -228,7 +242,7 @@
                 
             </div>
 
-            <div class="content-table">  
+            <div style="overflow-x: auto;" class="content-table">  
                 <div class="heading">
                     <h6 class="display-6">Withdrawal Histroy</h6>
                 </div>
@@ -236,8 +250,10 @@
                     <table class="withdrawal-detail-table" id="customers">
                         <tbody id="withdraw-histroy-table">
                             <tr>
+                                <th>Token</th>
                                 <th>TX ID</th>
-                                <th>Amount ETH</th>
+                                <th>Withdrawed By</th>
+                                <th>Amount</th>
                                 <th>Date</th>
                                 
                               </tr>
@@ -313,7 +329,7 @@
                     
                 </div>  
                 
-                <div class="content-table">  
+                <div style="overflow-x: auto;" class="content-table">  
                     <div class="heading">
                         <h6 class="display-6">Pending Tranfers</h6>
                     </div>
@@ -321,10 +337,11 @@
                         <table id="customers">
                             <tbody id="pending-transfers-table">
                                 <tr>
+                                    <th>token</th>
                                     <th>TX ID</th>
                                     <th>Receiver Address</th>
                                     <th>Sender Address</th>
-                                    <th>Amount ETH</th>
+                                    <th>Amount</th>
                                     <th>Date</th>
                                     <th>Approvals</th>
                                    
@@ -341,7 +358,7 @@
                     
                 </div>
     
-                <div class="content-table">  
+                <div style="overflow-x: auto;" class="content-table">  
                     <div class="heading">
                         <h6 class="display-6">Transfers Histroy</h6>
                     </div>
@@ -349,6 +366,7 @@
                         <table class="transfer-detail-table" id="customers">
                             <tbody id="transfer-histroy-table">
                                 <tr>
+                                    <th>Token</th>
                                     <th>TX ID</th>
                                     <th>Sender Address</th>
                                     <th>Receiver Address</th>
@@ -368,7 +386,7 @@
                     
                 </div>
 
-                <div class="content-table">  
+                <div style="overflow-x: auto;" class="content-table">  
                     <div class="heading">
                         <h6 class="display-6">Canceled Tranfers</h6>
                     </div>
@@ -376,6 +394,7 @@
                         <table class="cancelled-transfer-detail-table" id="customers">
                             <tbody id="cancelled-transfers-table">
                                 <tr>
+                                    <th>Token</th>
                                     <th>TX ID</th>
                                     <th>Receiver Address</th>
                                     <th>Sender Address</th>
@@ -504,6 +523,41 @@
             }
            
         }
+
+        // function selectToken(token) {
+        //     const ERC20TokenMenu = document.getElementById("ERC20-token-menu")
+        //     console.log("hello")
+        //     if(token === "ETH") {
+        //         console.log("helloooo")
+        //         ERC20TokenMenu.innerHTML = "ETH"
+        //         currentSelectedToken = "ETH"
+        //     }
+        //     else if(token == "BNB") {
+        //         ERC20TokenMenu.innerHTML = "BNB"
+        //         currentSelectedToken = "BNB"
+        //         currentSelectedToken1()
+
+        //     }
+        //     else if(token == "UNI") {
+        //         ERC20TokenMenu.innerHTML = "UNI"
+        //         currentSelectedToken = "UNI"
+
+        //     }
+        //     else if(token == "VET") {
+        //         ERC20TokenMenu.innerHTML = "VET"
+        //         currentSelectedToken = "VET"
+
+        //     }
+        //     else if(token == "LINK") {
+        //         ERC20TokenMenu.innerHTML = "LINK"
+        //         currentSelectedToken = "LINK"
+
+        //     }
+        // }
+
+        // function currentSelectedToken1() {
+        //     console.log(currentSelectedToken)
+        // }
     </script>
    
     <script>
@@ -523,7 +577,7 @@
 
     
 
-
+    
     <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.1.0/dist/jdenticon.min.js"></script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -531,4 +585,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>
+
 </html>
