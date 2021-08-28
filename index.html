@@ -14,10 +14,13 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.0/web3.min.js" integrity="sha512-0/nXBDmnbXRIkGvwIK2UWg4F8xscIFZHGl2sWevr6f0DnFEqZh4uTw78qLQYC16tVxbbHhoaaZLSBoIopZQucg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="module" src="index.js"></script>
+    <script type="module" src="admin.js"></script>
     <script
   src="https://code.jquery.com/jquery-3.6.0.js"
   integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
   crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-deferred@1.1.2"></script>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
       <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
@@ -56,16 +59,14 @@
                 </li>
                 
                 <li class="nav-item navbar-item">
-                    <a id="toggle-transfer-section" class="nav-link" href="#">Transactions</a>
-                <!-- <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                </div> -->
+                    <a id="toggle-transfer-section" class="nav-link" href="#">Transfers</a>
+                </li>
+                <li class="nav-item navbar-item">
+                    <a id="toggle-stats-section" class="nav-link" href="#">wallet Stats</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a id="ERC20-token-menu" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Dropdown
+                      
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                       <a  id="ETH" class="dropdown-item" href="#">ETH</a>
@@ -334,7 +335,7 @@
                         <h6 class="display-6">Pending Tranfers</h6>
                     </div>
                     <div class="table buttons">
-                        <table id="customers">
+                        <table  class="pending-transfer-detail-table" id="customers">
                             <tbody id="pending-transfers-table">
                                 <tr>
                                     <th>token</th>
@@ -414,6 +415,58 @@
                     
                     
                 </div>
+               
+                
+               
+            </section>
+
+            <!-- transfer histroy section -->
+        <section id="stats-section">
+            <div class="Containe">
+                <div class="heading">
+                    <h4 class="display-4">Wallet Statitics</h4>
+                    <div class="heading-line"></div>
+                </div>
+                
+    
+                
+                <div class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Represented Weighed Stake of Wallet Owners</h6>
+                    </div>
+                    <br>
+                    <div class="table buttons">
+                        <div style="width: 600px; height: 600px; position: relative; margin: 0 auto;"> <!--margin: 0 auto;-->
+                            <canvas id="myChart" width="550" height="550"></canvas>
+                        </div>
+                    </div>    
+                    <!-- <div style="position: relative; height: 100px; width: 100px;">
+                        <canvas id="myChart" width="100px" height="100px"></canvas>
+                    </div> -->
+                    
+                    
+                </div>
+
+                <div class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Wallet Activity</h6>
+                    </div>
+                    <br>
+                    <div class="table buttons">
+                        <div style="width: 600px; height: 600px; position: relative; margin: 0 auto;"> <!--margin: 0 auto;-->
+                            <canvas id="myChart2" width="550" height="550"></canvas>
+                        </div>
+                    </div>    
+                    <!-- <div style="position: relative; height: 100px; width: 100px;">
+                        <canvas id="myChart" width="100px" height="100px"></canvas>
+                    </div> -->
+                    
+                    
+                </div>
+    
+                
+                
+               
             </section>
    
 
@@ -470,9 +523,9 @@
             </div>
             
         </div>
-        <div class="popup-buttons-container">
-            <span class="popup-button"id="hh">Approve</span>
-            <span class="popup-button" id="hh">Cancel</span> 
+        <div class="popup-buttons-containers">
+            <span class="popup-button"id="quick-approve">Approve</span>
+            <span class="popup-button" id="quick-cancel">Cancel</span> 
         </div>
     </div>
 
@@ -493,6 +546,9 @@
 
    
     </body>
+
+    
+
 
    
 
@@ -570,14 +626,7 @@
           
         });
     </script>
-
-    
-    
-    
-
-    
-
-    
+        
     <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.1.0/dist/jdenticon.min.js"></script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

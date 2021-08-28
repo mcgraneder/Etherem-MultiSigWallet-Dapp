@@ -68,16 +68,17 @@ contract MultiSigWallet {
     }
 
     modifier tokenExists(string memory ticker) {
+        
         require(tokenMapping[ticker].tokenAddress != address(0), "Token does not exist");
-        _;
+         _;
     }
     
     //evets
     event fundsDeposited(string ticker, address from, uint256 id, uint amount, uint256 timeStamp);
     event fundsWithdrawed(string ticker, address from, uint256 id, uint amount, uint256 timeStamp);
-    event TransferRequestCreated(string ticker, uint _id, uint _amount, address _initiator, address _receiver);
-    event ApprovalReceived(string ticker, uint _id, uint _approvals, address _approver);
-    event TransferApproved(string ticker, uint _id);
+    event TransferRequestCreated(string ticker, uint id, uint _amount, address _initiator, address _receiver);
+    event ApprovalReceived(string ticker, uint id, uint _approvals, address _approver);
+    event TransferApproved(string ticker, uint id);
     // event t(uint id, address sender, address receiver, uint amount, uint timeOfTransfer);
     event transferRequestApproved(string ticker, uint id, address sender, address receiver, uint amount, uint timeStamp);
     event transferRequestCancelled(string ticker, uint id, address sender, address receiver, uint amount, uint timeStamp);
@@ -106,7 +107,7 @@ contract MultiSigWallet {
         {
             require(owners[user] != _owners, "Already registered");
         }
-        require(owners.length <= 4);
+        require(owners.length <= 5);
         owners.push(_owners);
         
         //from the current array calculate the value of minimum consensus
@@ -164,6 +165,7 @@ contract MultiSigWallet {
         _success = true;
         //emit deposited(msg.sender, address(this), amount, ticker);
         emit fundsDeposited(ticker, msg.sender, depositId, amount, block.timestamp);
+        depositId++;
 
         return _success;
     }
@@ -193,7 +195,7 @@ contract MultiSigWallet {
         balances[msg.sender][ticker] += amount;
         IERC20(tokenMapping[ticker].tokenAddress).transfer(msg.sender, amount);
         emit fundsWithdrawed(ticker, msg.sender, withdrawalId, amount, block.timestamp);
-
+        withdrawalId++;
 
     }
 
@@ -219,15 +221,15 @@ contract MultiSigWallet {
     
     
     //Create an instance of the Transfer struct and add it to the transferRequests array
-    function createTransfer(string memory _ticker, uint _amount, address payable _receiver) public tokenExists(_ticker) onlyOwners {
-        require(balances[msg.sender][_ticker] >= _amount);
+    function createTransfer(string memory _ticker, uint _amount, address payable _receiver) public onlyOwners {
+        require(balances[msg.sender][_ticker] >= _amount, "insufficient balance to create a transfer reauest");
         require(owners.length >= 1, "need to have more than one signer");
         //require(msg.sender != _receiver);
         reservedBalance[msg.sender][_ticker] -= _amount;
 
         for (uint i = 0; i < owners.length; i++)
         {
-            require(owners[i] != _receiver);
+            require(owners[i] != _receiver, "only the wallet owners can make transfer reuqests");
         //   if  (owners[i] == _receiver)
         //   {
         //       revert();
@@ -255,7 +257,7 @@ contract MultiSigWallet {
            }
            counter++;
         }
-        if(hasBeenFound == false) revert();
+        if(hasBeenFound == false) revert("Trnasfer ID not found cancellation");
 
         reservedBalance[msg.sender][ticker] += transferRequests[counter].amount;
         emit transferRequestCancelled(ticker, transferRequests[counter].id, msg.sender, transferRequests[counter].receiver, transferRequests[counter].amount, block.timestamp);
@@ -280,7 +282,7 @@ contract MultiSigWallet {
            }
            counter++;
         }
-        if(hasBeenFound == false) revert();
+        if(hasBeenFound == false) revert("Transfer ID not found for approval");
 
         require(owners.length >= 1, "need to have more than one signer");
         require(msg.sender != mainOwner);

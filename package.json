@@ -7,8 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "compile:sass": "sass --watch scss:assets/css",
-    "start": "./node_modules/.bin/nodemon index.js"
+    "compile:sass": "sass --watch scss:assets/css"
   },
   "author": "Evan McGrane",
   "license": "ISC",
@@ -21,10 +20,13 @@
     "@truffle/hdwallet-provider": "^1.5.0",
     "autoprefixer": "^10.3.1",
     "bootstrap": "^5.1.0",
+    "chart.js": "^3.5.1",
+    "chartjs-plugin-deferred": "^1.0.2",
     "http-server": "^13.0.0",
     "identicon": "^3.0.1",
     "nodemon": "^2.0.12",
     "postcss-cli": "^8.3.1",
     "requirejs": "^2.3.6"
   }
+  
 }
