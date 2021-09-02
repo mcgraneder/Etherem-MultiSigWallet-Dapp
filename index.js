@@ -1,7 +1,7 @@
 import data from './build/contracts/MultiSigWallet.json' assert { type: "json" };
 
 //0x9Dad734fEC00e2b1aE42DFA2eaf26a40eE31aFB1
-var acc = "";
+var account = "";
 var account = "";
 var contractInstance = "";
 var quickSelect
@@ -62,17 +62,16 @@ async function loadBlockchainData() {
 
   //gets all user accounts and displays the current user on the UI (navbar)
   var accounts = await web3.eth.getAccounts()
-  account = accounts[0].slice(0, 6);
-  acc = accounts[0];    
-  document.getElementById("display-address").innerHTML = "Account: " + acc.slice(0, 6) + "..";
-  document.getElementById("display-balance").innerHTML = "balance: 20 ETH";
+  account = accounts[0];    
+  document.getElementById("display-address").innerHTML = "Account: " + account.slice(0, 6) + "..";
+ 
 
   //gets the current network ID (e.g ropsten, kovan, mainnet) and uses the contract abi imported at the
   //top of this file to make a new contract instamce using web3.js new contract function. 
   const networkId = await web3.eth.net.getId()
   const networkData = data.networks[networkId]
   if(networkData) {
-    contractInstance = new web3.eth.Contract(data.abi, networkData.address, {from: acc})
+    contractInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
     console.log("the smart contract is " + networkData.address);
     console.log(contractInstance)
       
@@ -81,7 +80,22 @@ async function loadBlockchainData() {
   }
 
   document.getElementById("display-wallet-id").innerHTML = "Wallet ID: 1";
+  displayBalance();
+  loadAccountsTables("transferRequestApproved")
+  loadAccountsTables("transferRequestCancelled")
+  loadAdminTables("fundsDeposited")
+  loadAdminTables("fundsWithdrawed")
+  loadWalletOwners()
+  loadPendingTransfers()
+  loadChart()
+  
+}
 
+loadWeb3();
+loadBlockchainData();
+
+
+async function loadWalletOwners() {
   const owners = contractInstance.methods.getUsers().call().then(function(result) {
     for (let i = 0; i < result.length; i++) {
           addUserToTable1.innerHTML += `
@@ -92,11 +106,12 @@ async function loadBlockchainData() {
           </tr>`  
     }
   })
-  
+}
+
+async function loadPendingTransfers() {
   const pending = contractInstance.methods.getTransferRequests().call().then(function(result) {
     for (let i = 0; i < result.length; i++) {
-      var transferDate = result[i].timeOfCreation;
-      var transferDate1 = new Date(transferDate * 1000);
+      var transferDate1 = new Date(result[i].timeOfCreation * 1000);
       addPendingTranferToTable.innerHTML += `
       <tr id="tablerow">
             <td id="${result[i].id}">${result[i].ticker}</td>
@@ -109,33 +124,18 @@ async function loadBlockchainData() {
         </tr>`    
     }
   })
-
-  loadAdminTables("fundsDeposited")
-  loadAdminTables("fundsWithdrawed")
-  loadAccountsTables("transferRequestApproved")
-  loadAccountsTables("transferRequestCancelled")
-  displayBalance();
-  loadChart()
 }
-
-
 //loads the table data from the admin section on page load. This function is called from the loadBlockchainData()
 //function
-function loadAdminTables(tableName) {
- console.log("deposit log is ...")
+async function loadAdminTables(tableName) {
   var table;
   if(tableName == "fundsDeposited") table = addDepositToTable;
   else if(tableName == "fundsWithdrawed") table = addWithdrawalToTable
   
-  var results = contractInstance.getPastEvents(
-    tableName,
-    {fromBlock: 0}
-  ).then(function(result) {
+  var results = await contractInstance.getPastEvents(tableName, {fromBlock: 0}).then(function(result) {
     for (let i = 0; i < result.length; i++) {
-      var amount = result[i].returnValues.amount;
-      amount = amount / 10 ** 18;
-      var date = result[i].returnValues.timeStamp;//change contract to time in both withdraw and deoposit event
-      var date1 = new Date(date * 1000);
+      var amount = result[i].returnValues.amount / 10 ** 18;
+      var date1 = new Date(result[i].returnValues.timeStamp * 1000);
       table.innerHTML += `
           <tr "class="tablerow">
               <td id=${result[i].returnValues.id}>${result[i].returnValues.ticker}</td>
@@ -149,22 +149,17 @@ function loadAdminTables(tableName) {
 }
 //loads the table data from the accounts section on page load. This function is called from the loadBlockchainData()
 //function
-function loadAccountsTables(tableName) {
+async function loadAccountsTables(tableName) {
 
   var table;
   if(tableName == "transferRequestApproved") table = addTranferToTable;
   else if(tableName == "transferRequestCancelled") table = addCancelledTranferToTable
 
-  var results = contractInstance.getPastEvents(
-    tableName,
-    {fromBlock: 0}
-  ).then(function(result) {
+  var results = await contractInstance.getPastEvents(tableName,{fromBlock: 0}).then(function(result) {
     console.log(result)
     for (let i = 0; i < result.length; i++) {
-      var amount = result[i].returnValues.amount;
-      amount = amount / 10 ** 18;
-      var date = result[i].returnValues.timeStamp;
-      var date1 = new Date(date * 1000);
+      var amount = result[i].returnValues.amount / 10 ** 18;
+      var date1 = new Date(result[i].returnValues.timeStamp * 1000);
       table.innerHTML += `
       <tr onclick="console.log('hello')" id="tablerow">
             <td id="${result[i].returnValues.id}">${result[i].returnValues.ticker}</td>
@@ -195,15 +190,14 @@ function addUser(){
       return;
     }
 
-    contractInstance.methods.addUsers(addUserNullAddressField.value).send({from: acc}).on("transactionHash", function(hash) {
+    contractInstance.methods.addUsers(addUserNullAddressField.value).send({from: account}).on("transactionHash", function(hash) {
           loadLoader();  
-    })
-      //get receipt when ransaction is first mined
-      .on("receipt", function(receipt) {
+    }).on("receipt", function(receipt) {
           
           hideLoader();
           var popupMessage = document.getElementById("msg").innerHTML = "Wallet owner has been added";
           displayAddOwnerPopup(popupMessage);
+          
           addUserToTable1.innerHTML += `
           <tr class="tablerow">
               <td>${addUserNullAddressField.value}</td>
@@ -212,7 +206,8 @@ function addUser(){
           </tr>`
 
       }).on("error", function(error) {
-          console.log("user denied transaction");
+          var popupMessage = document.getElementById("msg").innerHTML = "User denied the tranaction";
+          displayAddOwnerPopup(popupMessage);
           hideLoader();
       })
 }
@@ -228,9 +223,8 @@ async function removeUser(){
     return;
   }
 
-  var counter = 1;
+  var counter = 0;
   await contractInstance.methods.getUsers().call().then(function(transferss) {
-
     for (let i = 0; i < transferss.length; i++) {
       if (transferss[i] == nullAddressField.value) {
          break;
@@ -239,40 +233,39 @@ async function removeUser(){
     }
   })
   
-  const removeUser = contractInstance.methods.removeUser(nullAddressField.value).send({from: acc}).on("transactionHash", function(hash) {
+  const removeUser = contractInstance.methods.removeUser(nullAddressField.value).send({from: account}).on("transactionHash", function(hash) {
         loadLoader();  
-    })
-    //get receipt when ransaction is first mined
-    .on("receipt", function(receipt) {
+
+    }).on("receipt", function(receipt) {
        
         hideLoader();
         var popupMessage = document.getElementById("msg").innerHTML = "Wallet owner has been removed";
         displayAddOwnerPopup(popupMessage);
         addUserToTable1.deleteRow(counter); 
+
     }).on("error", function(error) {
+        var popupMessage = document.getElementById("msg").innerHTML = "User denied the tranaction";
+        displayAddOwnerPopup(popupMessage);
         hideLoader();
     })
 }
 
 async function removeWallletOwner(e) {
   
-  const bt = e.target;
-  const btn = e.target.id;
+  const ownerId = e.target.id;
   var counter = 1;
   await contractInstance.methods.getUsers().call().then(function(transferss) {
     for (let i = 0; i < transferss.length; i++) {
-      if (transferss[i] == btn) {
+      if (transferss[i] == ownerId) {
          break;
       }
       counter++;
     }
   })
 
-  const removeUser = contractInstance.methods.removeUser(btn).send({from: acc}).on("transactionHash", function(hash) {
+  const removeUser = contractInstance.methods.removeUser(ownerId).send({from: account}).on("transactionHash", function(hash) {
         loadLoader();  
-    })
-    //get receipt when ransaction is first mined
-    .on("receipt", function(receipt) {
+    }).on("receipt", function(receipt) {
        
         hideLoader();
         var popupMessage = document.getElementById("msg").innerHTML = "Wallet owner has been removed";
@@ -280,6 +273,8 @@ async function removeWallletOwner(e) {
         addUserToTable1.deleteRow(counter);
 
     }).on("error", function(error) {
+        var popupMessage = document.getElementById("msg").innerHTML = "User denied the transaction";
+        displayAddOwnerPopup(popupMessage);
         hideLoader();
     })
   }
@@ -292,30 +287,26 @@ async function removeWallletOwner(e) {
 
 //lets any of the wallet owners deposit both ETH nad ERC20 tokens into the wallet
 function depositFunds(token) {
-  console.log(currentSelectedSection)
-  console.log("heyyyyy" + token)
-  var nullDepositField = document.getElementById("deposit-field");
   
+  var nullDepositField = document.getElementById("deposit-field");
   if (nullDepositField.value == "") {
     document.getElementById("popup-1").classList.toggle("active");
     return;
   }
   
-  console.log(currentSelectedToken)
   if(currentSelectedToken == "ETH") {
-    console.log("made ti")
-    var dep = contractInstance.methods.deposit().send({value: web3.utils.toWei(String(nullDepositField.value), "ether"), from: acc}).on("transactionHash", function(hash) {   
+    var dep = contractInstance.methods.deposit().send({value: web3.utils.toWei(String(nullDepositField.value), "ether"), from: account}).on("transactionHash", function(hash) {   
       loadLoader();
       
-    })
-    //get receipt when ransaction is first mined
-    .on("receipt", function(receipt) {
+    }).on("receipt", function(receipt) {
         
         hideLoader();
         var popupMessage = document.getElementById("msg").innerHTML = "Deposit successful! Balance has been updated";
         displayAddOwnerPopup(popupMessage);
   
     }).on("error", function(error) {
+        var popupMessage = document.getElementById("msg").innerHTML = "User denied the transaction";
+        displayAddOwnerPopup(popupMessage);
         hideLoader();
         
     }).then(function(result) {
@@ -323,18 +314,18 @@ function depositFunds(token) {
     })
   }
   else {
-    var dep = contractInstance.methods.depositERC20Token(web3.utils.toWei(String(nullDepositField.value), "ether"), currentSelectedToken).send({from: acc}).on("transactionHash", function(hash) {   
+    var dep = contractInstance.methods.depositERC20Token(web3.utils.toWei(String(nullDepositField.value), "ether"), currentSelectedToken).send({from: account}).on("transactionHash", function(hash) {   
       loadLoader();
       
-    })
-    //get receipt when ransaction is first mined
-    .on("receipt", function(receipt) {
+    }).on("receipt", function(receipt) {
         
         hideLoader();
         var popupMessage = document.getElementById("msg").innerHTML = "Deposit successful! Balance has been updated";
         displayAddOwnerPopup(popupMessage);
   
     }).on("error", function(error) {
+        var popupMessage = document.getElementById("msg").innerHTML = "User denied the transaction";
+        displayAddOwnerPopup(popupMessage);
         hideLoader();
         
     }).then(function(result) {
@@ -356,7 +347,7 @@ function withdrawFunds() {
   }
 
   if(currentSelectedToken == "ETH") {
-    var dep = contractInstance.methods.withdraw(web3.utils.toWei(String(nullWithdrawalField.value), "ether")).send({from: acc}).on("transactionHash", function(hash) {   
+    var dep = contractInstance.methods.withdraw(web3.utils.toWei(String(nullWithdrawalField.value), "ether")).send({from: account}).on("transactionHash", function(hash) {   
       loadLoader();
       
     })
@@ -375,7 +366,7 @@ function withdrawFunds() {
     })
   }
   else {
-    var dep = contractInstance.methods.withdrawERC20Token(web3.utils.toWei(String(nullWithdrawalField.value), "ether"), currentSelectedToken).send({from: acc}).on("transactionHash", function(hash) {   
+    var dep = contractInstance.methods.withdrawERC20Token(web3.utils.toWei(String(nullWithdrawalField.value), "ether"), currentSelectedToken).send({from: account}).on("transactionHash", function(hash) {   
       loadLoader();
       
     })
@@ -408,7 +399,7 @@ function updateAdminTables(eventName) {
 
   contractInstance.once(eventName, 
         {
-        filter: { player: acc },
+        filter: { player: account },
         fromBlock: 'latest'
         }, (error, event) => {
         if(error) throw("Error fetching events");
@@ -450,7 +441,7 @@ function createTransferRequest() {
     return;
   }
   
-  const createTransferRequest = contractInstance.methods.createTransfer(currentSelectedToken, web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress.value).send({from: acc}).on("transactionHash", function(hash) {
+  const createTransferRequest = contractInstance.methods.createTransfer(currentSelectedToken, web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress.value).send({from: account}).on("transactionHash", function(hash) {
     loadLoader();
   })
   //get receipt when ransaction is first mined
@@ -503,7 +494,7 @@ async function cancelTransferRequest() {
   var btn = ID
   
   
-  const cancelTransferRequest = await contractInstance.methods.cancelTransfer(currentSelectedToken, btn).send({from: acc}).on("transactionHash", function(hash) {
+  const cancelTransferRequest = await contractInstance.methods.cancelTransfer(currentSelectedToken, btn).send({from: account}).on("transactionHash", function(hash) {
     loadLoader();
   })
   //get receipt when ransaction is first mined
@@ -578,7 +569,7 @@ async function approveTransferRequest(e) {
   console.log("the id is " + ID)
   var approvalCounter = 1;
   var counter = 1;
-  const approveTransferRequest = await contractInstance.methods.Transferapprove(currentSelectedToken, ID).send({from: acc}).on("transactionHash", function(hash) {  
+  const approveTransferRequest = await contractInstance.methods.Transferapprove(currentSelectedToken, ID).send({from: account}).on("transactionHash", function(hash) {  
     loadLoader();
 
   }).on("confirmation", function(confirmationNr) {
@@ -601,7 +592,7 @@ async function approveTransferRequest(e) {
           approvalCounter++;
         }
         if (hasBeenFound) {
-          addPendingTranferToTable.rows[approvalCounter].cells[5].innerHTML = transferss[approvalCounter - 1].approvals;
+          addPendingTranferToTable.rows[approvalCounter].cells[6].innerHTML = transferss[approvalCounter - 1].approvals;
         }
         
         if (hasBeenFound == true) {
@@ -697,6 +688,8 @@ async function showTxInformation(e) {
     {fromBlock: 0}
   ).then(function(result) {
     console.log(result)
+
+    //here before we enter past events get table id.rows from DOM. Then predetermine the row index to save the below for loop
     for (let i = 0; i < result.length; i++ ) {
       if(result[i].returnValues.id == id) {
         hasBeenFound = true;
@@ -1057,6 +1050,5 @@ transferInfo.addEventListener("click", showTxInformation);
 const CancelledTransferInfo = document.querySelectorAll("table")[5];
 CancelledTransferInfo.addEventListener("click", showTxInformation);
 
-loadWeb3();
-loadBlockchainData();
+
 

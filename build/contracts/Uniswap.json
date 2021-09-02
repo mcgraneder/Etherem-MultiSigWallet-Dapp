@@ -8048,12 +8048,12 @@
         }
       },
       "links": {},
-      "address": "0x1C95B5d482b4Cb1F056A4889882C0d00Cc58310e",
-      "transactionHash": "0xd977aaa65c122fae4b1d870aa8be1b3b745faf3040d77892025bba9914cebf2b"
+      "address": "0x05F7A31eF1D746a955c3d4bA92CC69F72D7D15d4",
+      "transactionHash": "0xaf8d947a5886c2c43c18d8b641e320fe0265d83cb6d6c9517ae8be4496c9855b"
     }
   },
   "schemaVersion": "3.3.4",
-  "updatedAt": "2021-08-28T15:55:17.304Z",
+  "updatedAt": "2021-09-02T09:15:22.545Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
