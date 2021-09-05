@@ -1,6 +1,10 @@
 import data from './build/contracts/MultiSigWallet.json' assert { type: "json" };
 
+Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application id from moralis.io
+Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
+
 //0x9Dad734fEC00e2b1aE42DFA2eaf26a40eE31aFB1
+var owners = ["0x55DC41A449452d6e1A8fE915bBb607D97678263B", "0xF367CCe608Abe92370C5eA151ed9510438ebD61f", "0xBFb5a2d6353Eb76DF2A185d653332d2002521c52"]
 var account = "";
 var account = "";
 var contractInstance = "";
@@ -18,7 +22,41 @@ var currentSelectedToken
 //The init() function is called on page load and connects to metamask in order to connect our broweser to
 //the ethereum blockchain. If no current provider is found an error message is alerted letting the user
 //know than a non ethereum browser has been detected
-var ID;
+// function yourFunction(){
+//   // do whatever you like here
+//   // loadBlockchainData()
+//   var tableHeaderRowCount = 1;
+//   var table = document.getElementById('customerrrs');
+//   var rowCount = table.rows.length;
+//   for (var i = tableHeaderRowCount; i < rowCount; i++) {
+//       table.deleteRow(tableHeaderRowCount);
+//   }
+//   loadPendingTransfers()
+//   setTimeout(yourFunction, 5000);
+ 
+  
+// }
+
+// yourFunction();
+
+// async function login(){
+//   console.log("login clicked");
+  
+//   // document.getElementById(currentSelectedSection).style.display = "none";
+//   var user = await Moralis.Web3.authenticate();
+//   if(user){
+//     document.getElementById(currentSelectedSection).style.display = "block";
+//     loadBlockchainData()
+//     console.log(user);
+//     user.set("nickname","VITALIK");
+//     user.set("fav_color","blue");
+//     user.save();
+//   }
+// }
+// const login1 = document.getElementById("remove-user-from-wallet")
+// login1.onclick = login()
+
+var tableRowIndex;
 async function loadWeb3() {
   if (window.ethereum) {
     window.web3 = new Web3(window.ethereum)
@@ -65,36 +103,56 @@ async function loadBlockchainData() {
   account = accounts[0];    
   document.getElementById("display-address").innerHTML = "Account: " + account.slice(0, 6) + "..";
  
+  
+  if (owners.includes(account)) {
 
-  //gets the current network ID (e.g ropsten, kovan, mainnet) and uses the contract abi imported at the
-  //top of this file to make a new contract instamce using web3.js new contract function. 
-  const networkId = await web3.eth.net.getId()
-  const networkData = data.networks[networkId]
-  if(networkData) {
-    contractInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
-    console.log("the smart contract is " + networkData.address);
-    console.log(contractInstance)
+    console.log("you do own this wallet")
+    //gets the current network tableRowIndex (e.g ropsten, kovan, mainnet) and uses the contract abi imported at the
+    //top of this file to make a new contract instamce using web3.js new contract function. 
+    const networkId = await web3.eth.net.getId()
+    const networkData = data.networks[networkId]
+    if(networkData) {
+      contractInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
+      console.log("the smart contract is " + networkData.address);
+      console.log(contractInstance)
+        
+    } else {
+      window.alert('contract not deployed to detected network.')
       
-  } else {
-    window.alert('contract not deployed to detected network.')
+    }
+
+    document.getElementById("display-wallet-id").innerHTML = "Wallet tableRowIndex: 1";
+    displayBalance();
+    loadAccountsTables("transferRequestApproved")
+    loadAccountsTables("transferRequestCancelled")
+    loadAdminTables("fundsDeposited")
+    loadAdminTables("fundsWithdrawed")
+    loadWalletOwners()
+    loadPendingTransfers()
+    loadChart()
+  }
+  else {
+    console.log("you do not own this wallet")
+    document.getElementById("accounts-section").style.display = "none";
+    document.getElementById("transfer-section").style.display = "none";
+    document.getElementById("admin-section").style.display = "none";
+    document.getElementById("stats-section").style.display = "none";
+    document.getElementById(currentSelectedSection).style.display = "none";
+    return
   }
 
-  document.getElementById("display-wallet-id").innerHTML = "Wallet ID: 1";
-  displayBalance();
-  loadAccountsTables("transferRequestApproved")
-  loadAccountsTables("transferRequestCancelled")
-  loadAdminTables("fundsDeposited")
-  loadAdminTables("fundsWithdrawed")
-  loadWalletOwners()
-  loadPendingTransfers()
-  loadChart()
+  
+
+  
   
 }
 
+
 loadWeb3();
+// login()
 loadBlockchainData();
 
-
+// addPendingTranferToTable.innerHTML = ""
 async function loadWalletOwners() {
   const owners = contractInstance.methods.getUsers().call().then(function(result) {
     for (let i = 0; i < result.length; i++) {
@@ -340,7 +398,6 @@ function depositFunds(token) {
 function withdrawFunds() {
   
   var nullWithdrawalField = document.getElementById("withdraw-field");
-  
   if (nullWithdrawalField.value == "") {
     document.getElementById("popup-1").classList.toggle("active");
     return;
@@ -350,15 +407,15 @@ function withdrawFunds() {
     var dep = contractInstance.methods.withdraw(web3.utils.toWei(String(nullWithdrawalField.value), "ether")).send({from: account}).on("transactionHash", function(hash) {   
       loadLoader();
       
-    })
-    //get receipt when ransaction is first mined
-    .on("receipt", function(receipt) {
+    }).on("receipt", function(receipt) {
         
         hideLoader();
         var popupMessage = document.getElementById("msg").innerHTML = "Withdrawal successful! Balance has been updated";
         displayAddOwnerPopup(popupMessage);
   
     }).on("error", function(error) {
+        var popupMessage = document.getElementById("msg").innerHTML = "User denied the transaction";
+        displayAddOwnerPopup(popupMessage);
         hideLoader();
         
     }).then(function(result) {
@@ -369,9 +426,7 @@ function withdrawFunds() {
     var dep = contractInstance.methods.withdrawERC20Token(web3.utils.toWei(String(nullWithdrawalField.value), "ether"), currentSelectedToken).send({from: account}).on("transactionHash", function(hash) {   
       loadLoader();
       
-    })
-    //get receipt when ransaction is first mined
-    .on("receipt", function(receipt) {
+    }).on("receipt", function(receipt) {
         
         hideLoader();
         var popupMessage = document.getElementById("msg").innerHTML = "Withdrawal successful! Balance has been updated";
@@ -381,11 +436,12 @@ function withdrawFunds() {
         hideLoader();
         
     }).then(function(result) {
+        var popupMessage = document.getElementById("msg").innerHTML = "User denied the transaction";
+        displayAddOwnerPopup(popupMessage);
         displayBalance()
     })
   }
   
-
   updateAdminTables("fundsWithdrawed")
 }
 
@@ -419,12 +475,12 @@ function updateAdminTables(eventName) {
 
 }
 
-var x = document.getElementById("quick-cancel")
-var yy = document.getElementById("quick-cancel")
-yy.onclick = cancelTransferRequest
 
-var y = document.getElementById("quick-approve")
-y.onclick = approveTransferRequest
+var quickTransferCancelButton = document.getElementById("quick-cancel")
+quickTransferCancelButton.onclick = cancelTransferRequest
+
+var quickTransferApproveButton = document.getElementById("quick-approve")
+quickTransferApproveButton.onclick = approveTransferRequest
 ///////////////////////////////////#/////////////////////////////////////////////
 //                                                                            //   
 //   FUNCTIONS FOR THE TRANSFER SECTION CREATE/CANCEL/APPROVE TRANSFERS                                                           //
@@ -432,7 +488,7 @@ y.onclick = approveTransferRequest
 ////////////////////////////////////////////////////////////////////////////////
 
 function createTransferRequest() {
-  console.log(currentSelectedToken)
+
   var receiverAddress = document.getElementById("create-transfer-reciever-address-field");
   var transferAmount = document.getElementById("create-transfer-amount-field");
 
@@ -443,15 +499,12 @@ function createTransferRequest() {
   
   const createTransferRequest = contractInstance.methods.createTransfer(currentSelectedToken, web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress.value).send({from: account}).on("transactionHash", function(hash) {
     loadLoader();
-  })
-  //get receipt when ransaction is first mined
-  .on("receipt", function(receipt) {
+  }).on("receipt", function(receipt) {
      
       hideLoader();
       var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been created";
       const pendingTranfer = contractInstance.methods.getTransferRequests().call().then(function(result) {
-        var date = result[result.length - 1].timeStamp;
-        var date1 = new Date(date * 1000);
+        var date1 = new Date(result[result.length - 1].timeStamp * 1000);
         addPendingTranferToTable.innerHTML += `
         <tr class="tablerow">
               <td>${result[result.length - 1].ticker}</td>
@@ -467,6 +520,8 @@ function createTransferRequest() {
       displayBalance()
     
   }).on("error", function(error) {
+      var popupMessage = document.getElementById("msg").innerHTML = "User denied the transaction";
+      displayAddOwnerPopup(popupMessage);
       hideLoader();
   })
 
@@ -474,38 +529,23 @@ function createTransferRequest() {
 
 
 async function cancelTransferRequest() {
-  // console.log("THE ID IS: " + ID)
-  // var counter = 1;
+ 
   var transferID = document.getElementById("cancel-transfer-id-field");
-  // if (transferId.value == "") {
-  //   document.getElementById("popup-1").classList.toggle("active");
-  //   return;
-  // }
   if(quickSelect != true) {
-    console.log("yess")
-    ID = transferID.value
+    tableRowIndex = transferID.value
   }
-  console.log(quickSelect)
   var counter = 0;
-  console.log("hey")
-  console.log("The butto is" + ID)
-  console.log("the btn us " + ID)
-  // var x1 = btn.toNumber
-  var btn = ID
-  
+  var btn = tableRowIndex
   
   const cancelTransferRequest = await contractInstance.methods.cancelTransfer(currentSelectedToken, btn).send({from: account}).on("transactionHash", function(hash) {
     loadLoader();
-  })
-  //get receipt when ransaction is first mined
-  .on("receipt", function(receipt) {
+  }).on("receipt", function(receipt) {
       
       hideLoader();
       var popupMessage = document.getElementById("msg").innerHTML = "Transfer Request has successfully been canceled";
       displayAddOwnerPopup(popupMessage);
 
       contractInstance.methods.getTransferRequests().call().then(function(transferss) {
-
         var hasBeenFound = false;
         for (let i = 0; i < transferss.length; i++) {
          
@@ -515,7 +555,6 @@ async function cancelTransferRequest() {
           }
           counter++;
         }
-        console.log("The counter us " + counter)
         if (hasBeenFound == true) {
           return;
         }
@@ -524,10 +563,8 @@ async function cancelTransferRequest() {
             "transferRequestCancelled",
             {fromBlock: 0}
           ).then(function(result) {
-            var amount = result[result.length - 1].returnValues.amount;
-            amount = amount / 10 ** 18;
-            var date = result[result.length - 1].returnValues.timeStamp;
-            var date1 = new Date(date * 1000);
+            var amount = result[result.length - 1].returnValues.amount / 10 ** 18;
+            var date1 = new Date(result[result.length - 1].returnValues.timeStamp * 1000);
             addCancelledTranferToTable.innerHTML += `
                 <tr onclick="console.log('hello')" id="tablerow">
                       <td id="${result[result.length - 1].id}">${result[result.length - 1].returnValues.ticker}</td>
@@ -550,9 +587,7 @@ async function cancelTransferRequest() {
 }
 1
 function tableRowClicked(e) {
-  ID = e.target.id;
-  console.log(ID)
-  console.log("The butto is")
+  tableRowIndex = e.target.id;
   quickSelect = true 
   }
 
@@ -561,15 +596,12 @@ async function approveTransferRequest(e) {
   
   var transferID = document.getElementById("approve-transfer-field");
   if(quickSelect != true) {
-    console.log("yess")
-    ID = transferID.value
+    tableRowIndex = transferID.value
   }
-  console.log(quickSelect)
-  console.log("id is " + ID)
-  console.log("the id is " + ID)
+
   var approvalCounter = 1;
   var counter = 1;
-  const approveTransferRequest = await contractInstance.methods.Transferapprove(currentSelectedToken, ID).send({from: account}).on("transactionHash", function(hash) {  
+  const approveTransferRequest = await contractInstance.methods.Transferapprove(currentSelectedToken, tableRowIndex).send({from: account}).on("transactionHash", function(hash) {  
     loadLoader();
 
   }).on("confirmation", function(confirmationNr) {
@@ -585,7 +617,7 @@ async function approveTransferRequest(e) {
         var hasBeenFound = false;
         for (let i = 0; i < transferss.length; i++) {
          
-          if (transferss[i].id == ID) {
+          if (transferss[i].id == tableRowIndex) {
             hasBeenFound = true;
             break;
           }
@@ -646,11 +678,9 @@ async function showTxInformation(e) {
 
   var id = e.target.id;
   var event = e.target.closest("table").className
-  console.log(event)
   var eventName
   var tableName;
-  console.log("id is " + id)
-  //do something with counter to get id
+ 
   var div = document.getElementById("etherscan-link")
   var etherscanLink = document.createElement("a")
   etherscanLink.setAttribute('target', "_blank")
@@ -658,37 +688,33 @@ async function showTxInformation(e) {
   
   if (event == "deposit-detail-table") {
     eventName = "fundsDeposited"
-    tableName = "Deposit ID: "
+    tableName = "Deposit tableRowIndex: "
   }
   if (event == "pending-transfer-detail-table") {
     eventName = "TransferRequestCreated"
-    tableName = "Transfer ID: "
+    tableName = "Transfer tableRowIndex: "
   }
   else if(event == "withdrawal-detail-table") {
     eventName = "fundsWithdrawed"
-    tableName = "Withdrawal ID: "
+    tableName = "Withdrawal tableRowIndex: "
   }
   else if (event == "transfer-detail-table") {
     eventName = "transferRequestApproved"
-    tableName = "Transfer ID: "
+    tableName = "Transfer tableRowIndex: "
     console.log("success")
   }
   else if(event =="cancelled-transfer-detail-table") {
     eventName = "transferRequestCancelled"
-    tableName = "Cancelled-Trnasfer ID: "
+    tableName = "Cancelled-Trnasfer tableRowIndex: "
   }
-  console.log(eventName)
-
+ 
   document.getElementById("tx-details").innerHTML = tableName + id;
   togglePopup2()
+
   var counter = 0;
   var hasBeenFound = false;
-  var results = await contractInstance.getPastEvents(
-    eventName,
-    {fromBlock: 0}
-  ).then(function(result) {
-    console.log(result)
-
+  var results = await contractInstance.getPastEvents(eventName, {fromBlock: 0}).then(function(result) {
+    
     //here before we enter past events get table id.rows from DOM. Then predetermine the row index to save the below for loop
     for (let i = 0; i < result.length; i++ ) {
       if(result[i].returnValues.id == id) {
@@ -718,7 +744,7 @@ async function showTxInformation(e) {
                 <td>${result[counter].blockNumber}</td>
               </tr>
               <tr>
-                <td>TX ID</td>
+                <td>TX tableRowIndex</td>
                 <td>${result[counter].id}</td>
               </tr>
               <tr>
@@ -859,84 +885,87 @@ function toggleStatisticsSection() {
 
 
 function loadChart() {
-  var ctx = document.getElementById('myChart').getContext('2d');
-                    var myChart = new Chart(ctx, {
-                        type: 'pie',
-                        responsive:true,
-                        data: {
-                            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
-                            datasets: [{
-                                label: '# of Votes',
-                                data: [12, 19, 3, 5, 2],
-                                backgroundColor: [
-                                    'rgba(255, 99, 132, 0.2)',
-                                    'rgba(54, 162, 235, 0.2)',
-                                    'rgba(255, 206, 86, 0.2)',
-                                    'rgba(75, 192, 192, 0.2)',
-                                    'rgba(153, 102, 255, 0.2)',
-    
-                                ],
-                                borderColor: [
-                                    'rgba(255, 99, 132, 1)',
-                                    'rgba(54, 162, 235, 1)',
-                                    'rgba(255, 206, 86, 1)',
-                                    'rgba(75, 192, 192, 1)',
-                                    'rgba(153, 102, 255, 1)',
-                                    
-                                ],
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                },
-                                responsive: true,
-                                maintainAspectRatio: false
-                            }
-                        }
-                    });
-                    setTimeout(function(){
+  
+  var ctx = document.getElementById('canvas').getContext('2d');
+			var chart = new Chart(ctx, {
+				type: 'pie',
+				data: {
+                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+                datasets: [{
+                    label: '# of Votes',
+                    data: [12, 19, 3, 5, 2,],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        
+                    ],
+                    borderWidth: 1
+                }]
+            },
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					legend: {
+						position: 'top',
+					},
+					title: {
+						display: true,
+						text: 'Chart.js Bar Chart'
+					}
+				}
+      })
+    setTimeout(function(){
+      var ctx = document.getElementById('canvas2').getContext('2d');
+			var chart2 = new Chart(ctx, {
+				type: 'line',
+				data: {
+                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+                datasets: [{
+                    label: '# of Votes',
+                    data: [12, 19, 3, 5, 2,],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        
+                    ],
+                    borderWidth: 1
+                }]
+            },
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					legend: {
+						position: 'top',
+					},
+					title: {
+						display: true,
+						text: 'Chart.js Bar Chart'
+					}
+				}
+			});
                 
-                      var ctx = document.getElementById('myChart2').getContext('2d');
-                          var myChart2 = new Chart(ctx, {
-                              type: 'line',
-                              responsive:true,
-                              data: {
-                                  labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
-                                  datasets: [{
-                                      label: '# of Votes',
-                                      data: [12, 19, 3, 5, 2,],
-                                      backgroundColor: [
-                                          'rgba(54, 162, 235, 0.2)',
-                                          'rgba(255, 206, 86, 0.2)',
-                                          'rgba(75, 192, 192, 0.2)',
-                                          'rgba(153, 102, 255, 0.2)',
-                                          
-                                      ],
-                                      borderColor: [
-                                          'rgba(255, 99, 132, 1)',
-                                          'rgba(54, 162, 235, 1)',
-                                          'rgba(255, 206, 86, 1)',
-                                          'rgba(75, 192, 192, 1)',
-                                          'rgba(153, 102, 255, 1)',
-                                         
-                                      ],
-                                      borderWidth: 1
-                                  }]
-                              },
-                              options: {
-                                  scales: {
-                                      y: {
-                                          beginAtZero: true
-                                      },
-                                      responsive: true,
-                                      maintainAspectRatio: false
-                                  }
-                              }
-                          })
-                      }, 600);
+                      
+    }, 600);
 }
 const toggleStatistics = document.getElementById("toggle-stats-section");
 toggleStatistics.onclick = toggleStatisticsSection;

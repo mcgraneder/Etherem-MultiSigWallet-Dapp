@@ -14,13 +14,15 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.0/web3.min.js" integrity="sha512-0/nXBDmnbXRIkGvwIK2UWg4F8xscIFZHGl2sWevr6f0DnFEqZh4uTw78qLQYC16tVxbbHhoaaZLSBoIopZQucg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="module" src="index.js"></script>
-    
+    <script src="Chart.min.js"></script>
+	<script src="utils.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
     <script
   src="https://code.jquery.com/jquery-3.6.0.js"
   integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
   crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-deferred@1.1.2"></script>
+  
+  
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
       <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
@@ -55,7 +57,7 @@
                 <a id="toggle-admin-section" class="nav-link" href="#">Admin</a>
                 </li>
                 <li class="nav-item navbar-item">
-                <a id="toggle-accounts-section" class="nav-link" href="#">Accounts</a>
+                <a id="toggle-accounts-section" class="nav-link" href="https://www.w3schools.com/">Accounts</a>
                 </li>
                 
                 <li class="nav-item navbar-item">
@@ -104,7 +106,7 @@
     </nav>
 
     
-   
+    <a href="./login-form-05/login.html">Accounts</a>
     <section id="admin-section">
     <div class="Containe">
         <div class="heading">
@@ -335,7 +337,7 @@
                         <h6 class="display-6">Pending Tranfers</h6>
                     </div>
                     <div class="table buttons">
-                        <table  class="pending-transfer-detail-table" id="customers">
+                        <table  class="pending-transfer-detail-table" id="customerrrs">
                             <tbody id="pending-transfers-table">
                                 <tr>
                                     <th>token</th>
@@ -436,8 +438,8 @@
                     </div>
                     <br>
                     <div class="table buttons">
-                        <div style="width: 600px; height: 600px; position: relative; margin: 0 auto;"> <!--margin: 0 auto;-->
-                            <canvas id="myChart" width="550" height="550"></canvas>
+                        <div id="container" style="width: 100%;height: 80vh">
+                            <canvas id="canvas"></canvas>
                         </div>
                     </div>    
                     <!-- <div style="position: relative; height: 100px; width: 100px;">
@@ -453,8 +455,11 @@
                     </div>
                     <br>
                     <div class="table buttons">
-                        <div style="width: 600px; height: 600px; position: relative; margin: 0 auto;"> <!--margin: 0 auto;-->
-                            <canvas id="myChart2" width="550" height="550"></canvas>
+                        <!-- <div style="width: 100%;height: 80vh"> 
+                            <canvas id="myChart2" ></canvas>
+                        </div> -->
+                        <div id="container" style="width: 100%;height: 80vh">
+                            <canvas id="canvas2"></canvas>
                         </div>
                     </div>    
                     <!-- <div style="position: relative; height: 100px; width: 100px;">
@@ -549,7 +554,96 @@
 
     
 
+    <script>
+		
+		window.onload = function() {
+			// var ctx = document.getElementById('canvas').getContext('2d');
+			// var chart = new Chart(ctx, {
+			// 	type: 'pie',
+			// 	data: {
+            //                       labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+            //                       datasets: [{
+            //                           label: '# of Votes',
+            //                           data: [12, 19, 3, 5, 2,],
+            //                           backgroundColor: [
+            //                               'rgba(54, 162, 235, 0.2)',
+            //                               'rgba(255, 206, 86, 0.2)',
+            //                               'rgba(75, 192, 192, 0.2)',
+            //                               'rgba(153, 102, 255, 0.2)',
+                                          
+            //                           ],
+            //                           borderColor: [
+            //                               'rgba(255, 99, 132, 1)',
+            //                               'rgba(54, 162, 235, 1)',
+            //                               'rgba(255, 206, 86, 1)',
+            //                               'rgba(75, 192, 192, 1)',
+            //                               'rgba(153, 102, 255, 1)',
+                                         
+            //                           ],
+            //                           borderWidth: 1
+            //                       }]
+            //                   },
+			// 	options: {
+			// 		responsive: true,
+			// 		maintainAspectRatio: false,
+			// 		legend: {
+			// 			position: 'top',
+			// 		},
+			// 		title: {
+			// 			display: true,
+			// 			text: 'Chart.js Bar Chart'
+			// 		}
+			// 	}
+			// });
 
+            var ctx = document.getElementById('canvas2').getContext('2d');
+			var chart2 = new Chart(ctx, {
+				type: 'line',
+				data: {
+                                  labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+                                  datasets: [{
+                                      label: '# of Votes',
+                                      data: [12, 19, 3, 5, 2,],
+                                      backgroundColor: [
+                                          'rgba(54, 162, 235, 0.2)',
+                                          'rgba(255, 206, 86, 0.2)',
+                                          'rgba(75, 192, 192, 0.2)',
+                                          'rgba(153, 102, 255, 0.2)',
+                                          
+                                      ],
+                                      borderColor: [
+                                          'rgba(255, 99, 132, 1)',
+                                          'rgba(54, 162, 235, 1)',
+                                          'rgba(255, 206, 86, 1)',
+                                          'rgba(75, 192, 192, 1)',
+                                          'rgba(153, 102, 255, 1)',
+                                         
+                                      ],
+                                      borderWidth: 1
+                                  }]
+                              },
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					legend: {
+						position: 'top',
+					},
+					title: {
+						display: true,
+						text: 'Chart.js Bar Chart'
+					}
+				}
+			});
+
+		};
+
+		
+
+	
+		
+		
+		
+	</script>
    
 
   
@@ -580,47 +674,10 @@
            
         }
 
-        // function selectToken(token) {
-        //     const ERC20TokenMenu = document.getElementById("ERC20-token-menu")
-        //     console.log("hello")
-        //     if(token === "ETH") {
-        //         console.log("helloooo")
-        //         ERC20TokenMenu.innerHTML = "ETH"
-        //         currentSelectedToken = "ETH"
-        //     }
-        //     else if(token == "BNB") {
-        //         ERC20TokenMenu.innerHTML = "BNB"
-        //         currentSelectedToken = "BNB"
-        //         currentSelectedToken1()
-
-        //     }
-        //     else if(token == "UNI") {
-        //         ERC20TokenMenu.innerHTML = "UNI"
-        //         currentSelectedToken = "UNI"
-
-        //     }
-        //     else if(token == "VET") {
-        //         ERC20TokenMenu.innerHTML = "VET"
-        //         currentSelectedToken = "VET"
-
-        //     }
-        //     else if(token == "LINK") {
-        //         ERC20TokenMenu.innerHTML = "LINK"
-        //         currentSelectedToken = "LINK"
-
-        //     }
-        // }
-
-        // function currentSelectedToken1() {
-        //     console.log(currentSelectedToken)
-        // }
     </script>
    
     <script>
-        // $(window).on("load",function(){
-        //   $(".loading").fadeOut(2000);
-        // });
-
+       
         $(window).on("load",function(){
           $(".loader-wrapper").fadeOut(1200);
           
