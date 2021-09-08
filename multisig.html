@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+   
+    <title>MultisigWallet</title>
+    
+    
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.0/web3.min.js" integrity="sha512-0/nXBDmnbXRIkGvwIK2UWg4F8xscIFZHGl2sWevr6f0DnFEqZh4uTw78qLQYC16tVxbbHhoaaZLSBoIopZQucg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="module" src="index.js"></script>
+    <script src="Chart.min.js"></script>
+	<script src="utils.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+    <script
+  src="https://code.jquery.com/jquery-3.6.0.js"
+  integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+  crossorigin="anonymous"></script>
+  
+  
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+      <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+
+  
+ 
+  
+    
+</head>
+<body>
+
+    <div class="loader-content">
+      </div>
+      <div class="loader-wrapper">
+        <div class="loader"><div class="loader-inner"></div></div>
+      </div>
+    
+
+    
+    <section>
+    <nav id="nav" class="navbar navbar-expand-lg navbar-light bg-light menu shadow-lg sticky-top">
+        <a class="navbar-brand" href="#">MultiSig Wallet</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+                <li class="nav-item active">
+                <a class="nav-link" href="#"><span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item navbar-item">
+                <a id="toggle-admin-section" class="nav-link" href="#">Admin</a>
+                </li>
+                <li class="nav-item navbar-item">
+                <a id="toggle-accounts-section" class="nav-link" href="#">Accounts</a>
+                </li>
+                
+                <li class="nav-item navbar-item">
+                    <a id="toggle-transfer-section" class="nav-link" href="#">Transfers</a>
+                </li>
+                <li class="nav-item navbar-item">
+                    <a id="toggle-stats-section" class="nav-link" href="#">wallet Stats</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a id="ERC20-token-menu" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <a  id="ETH" class="dropdown-item" href="#">ETH</a>
+                      <a  id="LINK" class="dropdown-item" href="#">LINK</a>
+                      <a  id="UNI" class="dropdown-item" href="#">UNI</a>
+                      <a  id="VET" class="dropdown-item" href="#">VET</a>
+                      <a id="BNB" class="dropdown-item" href="#">BNB</a>
+                    </div>
+                  </li>
+            </ul>
+        </div>
+        <div class="collapse navbar-collapse justify-content-end balances" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+            <li class="nav-item active navbar-item">
+                <a class="nav-link" id="display-wallet-id" href="#"><span></span><span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item active navbar-item">
+                <a class="nav-link" id="display-balance" href="#"><span></span><span class="sr-only"></span></a>
+            </li>
+            <!-- <li class="nav-item active navbar-item">
+                <div class="card">
+                    <svg class="card-img-top" data-jdenticon-value="tedir" height="20px" width="20px"></svg>
+                </div>
+            </li> -->
+            <li class="nav-item active navbar-item" id="acc">
+                
+                <div>
+                    <a class="nav-link pt-md-2" id="display-address" href="#"><span></span><span class="sr-only"></span></a>
+                </div>
+                
+                
+            </li>
+            </ul>
+        </div>       
+    </nav>
+
+    
+    <a href="/index.html">Logout</a>
+    <section id="admin-section">
+    <div class="Containe">
+        <div class="heading">
+            <h4 class="display-4">Admin</h4>
+            <div class="heading-line"></div>
+        </div>
+        
+        <div class="content">
+            
+                <div class="heading">
+                    <h6 class="display-6">Remove Owner</h6>
+                </div>
+                <div class="add-user-from">
+                    <div class="form-style-6">
+                        
+                        <form  onsubmit="preventDefault()">
+                            <input id="remove-user-name-field" type="text" name="field1" placeholder="Name" required/>
+                            <input id="remove-user-address-field" type="email" name="field2" placeholder="Address" required />
+                            <input id="remove-user-from-wallet" class="submit-button" type="Button" value="Remove User" required/>
+                        </form>
+                    </div>
+                </div>
+               
+            
+        </div>  
+        <div class="content">  
+                <div class="heading">
+                    <h6 class="display-6">Add Owner</h6>
+                </div>
+                <div class="remove-user-from">
+                    <div class="form-style-6">
+                        
+                        <form onsubmit="preventDefault()">
+                            <input id="add-user-name-field" type="text" name="field1" placeholder="Name" required/>
+                            <input id="add-user-address-field" type="text" name="field2" placeholder="Address" required/>
+                            <input  id="add-user-to-wallet" class="submit-button" type="button" value="Add User" required/>
+                        </form>
+                        
+                    </div>
+                </div>
+                
+           
+            
+        </div>
+        <div class="content-table">  
+            <div class="heading">
+                <h6 class="display-6">Wallet Owners</h6>
+            </div>
+            <div style="overflow-x: auto;" class="table buttons">
+                <table id="owners-table">
+                    <tbody>
+                        <tr>
+                            <th>Address</th>
+                            <th>Name</th>
+                            <th>Remove</th>
+                            
+                          </tr>
+                    </tbody>
+                    
+
+                
+                  </table>
+            </div>    
+    </div>
+    </section>
+
+
+    <!-- accounts section -->
+    <section id="accounts-section">
+        <div class="Containe">
+            <div class="heading">
+                <h4 class="display-4">Accounts</h4>
+                <div class="heading-line"></div>
+            </div>
+            
+            <div class="content">
+                
+                    <div class="heading">
+                        <h6 class="display-6">Deposit</h6>
+                    </div>
+                    <div class="add-user-from">
+                        <div class="form-style-6">
+                            
+                            <form>
+                                <input id="deposit-field" type="number" name="field1" placeholder="Amount" required/>
+                                <input id="deposit" class="submit-button" type="Button" value="Deposit" required/>
+                            </form>
+                        </div>
+                    </div>
+                   
+                
+            </div>  
+            <div class="content">  
+                    <div class="heading">
+                        <h6 class="display-6">Withdraw</h6>
+                    </div>
+                    <div class="remove-user-from">
+                        <div class="form-style-6">
+                            
+                            <form>
+                                <input id="withdraw-field" type="number" name="field1" placeholder="Amount" required/>
+                                <input id="withdraw" class="submit-button" type="Button" value="Withdraw" required/>
+                            </form> 
+                        </div>
+                    </div>        
+            </div>
+            
+            <div class="heading">
+                <h4 class="display-4">Transfer</h4>
+                <div class="heading-line"></div>
+            </div>
+            
+            <div class="content-table">  
+                <div class="heading">
+                    <h6 class="display-6">Deposit Histroy</h6>
+                </div>
+                <div style="overflow-x: auto;" class="table buttons">
+                    <table class="deposit-detail-table" id="customers">
+                        <tbody class="d" id="deposit-histroy-table">
+                            <tr class="d">
+                                <th>Token</th>
+                                <th>TX ID</th>
+                                <th>Deposited By</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                
+                              </tr>
+                              
+                        </tbody>
+                        
+                        
+                    
+                      </table>
+                </div>    
+                
+                
+            </div>
+
+            <div style="overflow-x: auto;" class="content-table">  
+                <div class="heading">
+                    <h6 class="display-6">Withdrawal Histroy</h6>
+                </div>
+                <div class="table buttons">
+                    <table class="withdrawal-detail-table" id="customers">
+                        <tbody id="withdraw-histroy-table">
+                            <tr>
+                                <th>Token</th>
+                                <th>TX ID</th>
+                                <th>Withdrawed By</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                
+                              </tr>
+                              
+                        </tbody>
+                        
+                        
+                    
+                      </table>
+                </div>    
+                
+                
+            </div>
+        </section>
+        
+
+        <!-- transfer histroy section -->
+        <section id="transfer-section">
+            <div class="Containe">
+                <div class="heading">
+                    <h4 class="display-4">Transfer Histroy</h4>
+                    <div class="heading-line"></div>
+                </div>
+
+                <div class="content">  
+                    <div class="heading">
+                        <h6 class="display-6">Create Transfer</h6>
+                    </div>
+                    <div class="remove-user-from">
+                        <div class="form-style-6">
+                            
+                            <form>
+                                <input id="create-transfer-reciever-address-field" type="text" name="field1" placeholder="Reciever Address" required/>
+                                <input id="create-transfer-amount-field" type="number" name="field1" placeholder="Amount" required/>
+                                <input id="transfer" class="submit-button" type="Button" value="Transfer" required/>
+                            </form> 
+                        </div>
+                    </div> 
+                </div>      
+                    
+                <div class="content">  
+                    <div class="heading">
+                        <h6 class="display-6">Cancel Transfer</h6>
+                    </div>
+                    <div class="remove-user-from">
+                        <div class="form-style-6">
+                                
+                            <form>
+                                <input id="cancel-transfer-reciever-address-field" type="text" name="field1" placeholder="Transaction Hash" required/>
+                                <input id="cancel-transfer-id-field" type="number" name="field1" placeholder="Transfer ID" required/>
+                                <input id="cancel-transfer" class="submit-button" type="Button" value="Cancel Transfer" required/>
+                            </form> 
+                        </div>
+                    </div>       
+                </div>
+    
+                
+                <div class="content">
+                    
+                        <div class="heading">
+                            <h6 class="display-6">Approve Transfer</h6>
+                        </div>
+                        <div class="add-user-from">
+                            <div class="form-style-6">
+                                
+                                <form>
+                                    <input id="approve-transfer-field" type="number" name="field1" placeholder="Transfer ID" required/>
+                                    <input id="approveTransfer" class="submit-button" type="Button" value="Approve Transfer" required/>
+                                </form>
+                            </div>
+                        </div>
+                       
+                    
+                </div>  
+                
+                <div style="overflow-x: auto;" class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Pending Tranfers</h6>
+                    </div>
+                    <div class="table buttons">
+                        <table  class="pending-transfer-detail-table" id="customers">
+                            <tbody id="pending-transfers-table">
+                                <tr>
+                                    <th>token</th>
+                                    <th>TX ID</th>
+                                    <th>Receiver Address</th>
+                                    <th>Sender Address</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Approvals</th>
+                                   
+                                    
+                                  </tr>
+                                  
+                            </tbody>
+                            
+                            
+                        
+                          </table>
+                    </div>    
+                    
+                    
+                </div>
+    
+                <div style="overflow-x: auto;" class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Transfers Histroy</h6>
+                    </div>
+                    <div class="table buttons">
+                        <table class="transfer-detail-table" id="customers">
+                            <tbody id="transfer-histroy-table">
+                                <tr>
+                                    <th>Token</th>
+                                    <th>TX ID</th>
+                                    <th>Sender Address</th>
+                                    <th>Receiver Address</th>
+                                    <th>Amount ETH</th>
+                                    <th>Date</th>
+                            
+                                    
+                                  </tr>
+                                  
+                            </tbody>
+                            
+                            
+                        
+                          </table>
+                    </div>    
+                    
+                    
+                </div>
+
+                <div style="overflow-x: auto;" class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Canceled Tranfers</h6>
+                    </div>
+                    <div class="table buttons">
+                        <table class="cancelled-transfer-detail-table" id="customers">
+                            <tbody id="cancelled-transfers-table">
+                                <tr>
+                                    <th>Token</th>
+                                    <th>TX ID</th>
+                                    <th>Receiver Address</th>
+                                    <th>Sender Address</th>
+                                    <th>Amount ETH</th>
+                                    <th>Date</th>
+                                    
+                                    
+                                  </tr>
+                                  
+                            </tbody>
+                            
+                            
+                        
+                          </table>
+                    </div>   
+                     
+                    
+                    
+                </div>
+               
+                
+               
+            </section>
+
+            <!-- transfer histroy section -->
+        <section id="stats-section">
+            <div class="Containe">
+                <div class="heading">
+                    <h4 class="display-4">Wallet Statitics</h4>
+                    <div class="heading-line"></div>
+                </div>
+                
+    
+                
+                <div class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Represented Weighed Stake of Wallet Owners</h6>
+                    </div>
+                    <br>
+                    <div class="table buttons">
+                        <div id="container" style="width: 100%;height: 80vh">
+                            <canvas id="canvas"></canvas>
+                        </div>
+                    </div>    
+                    <!-- <div style="position: relative; height: 100px; width: 100px;">
+                        <canvas id="myChart" width="100px" height="100px"></canvas>
+                    </div> -->
+                    
+                    
+                </div>
+
+                <div class="content-table">  
+                    <div class="heading">
+                        <h6 class="display-6">Wallet Activity</h6>
+                    </div>
+                    <br>
+                    <div class="table buttons">
+                        <!-- <div style="width: 100%;height: 80vh"> 
+                            <canvas id="myChart2" ></canvas>
+                        </div> -->
+                        <div id="container" style="width: 100%;height: 80vh">
+                            <canvas id="canvas2"></canvas>
+                        </div>
+                    </div>    
+                    <!-- <div style="position: relative; height: 100px; width: 100px;">
+                        <canvas id="myChart" width="100px" height="100px"></canvas>
+                    </div> -->
+                    
+                    
+                </div>
+    
+                
+                
+               
+            </section>
+   
+
+
+
+    <!-- Popups -->
+    <div class="popup" id="popup-1">
+        <div class="overlay"></div>
+        <div class="content">
+          <div class="close-btn" onclick="togglePopup()">×</div>
+          <h1>Title</h1>
+          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo aspernatur laborum rem sed laudantium excepturi veritatis voluptatum architecto, dolore quaerat totam officiis nisi animi accusantium alias inventore nulla atque debitis.</p>
+        </div>
+    </div>
+
+    <div id="loader-11" class="loading loading--full-height" style="display: none;"></div>
+
+  
+      <!-- <div class="alert hide">
+         <div class="fas fa-exclamation-circle"></div>
+         <div id="msg" class="msg" ></div>
+         <div id="close-btn" class="close-btn">
+            <div class="fas fa-times"></div>
+         </div>
+      </div> -->
+
+      <div class="popup2" id="popup-2">
+        <div class="overlay2"></div>
+        <div class="content2">
+          <div class="close-btn2" onclick=togglePopup2()>×</div>
+          <div class="content-table">  
+            <div class="heading">
+                <h6 style="font-size: 30px !important;" id="tx-details" class="display-6"></h6>
+            </div>
+            
+           
+            <div class="table buttons">
+                
+                <table id="owners-table1">
+                   <thead>
+                        <tr>
+                        <th colspan="2">Transaction Details</th>
+                      </tr>
+                   </thead>
+                       
+                    <tbody>
+
+                    </tbody>
+                </table>
+                 
+                  <br>
+                  <div id="etherscan-link" style="text-align: center;"></div>
+                  
+            </div>
+            
+        </div>
+        <div class="popup-buttons-containers">
+            <span class="popup-button"id="quick-approve">Approve</span>
+            <span class="popup-button" id="quick-cancel">Cancel</span> 
+        </div>
+    </div>
+
+    <div id="loader-11" class="loading loading--full-height" style="display: none;"></div>
+
+  
+      <div class="alert hide">
+         <div class="fas fa-exclamation-circle"></div>
+         <div id="msg" class="msg" ></div>
+         <div id="close-btn" class="close-btn">
+            <div class="fas fa-times"></div>
+         </div>
+      </div>
+
+      
+      
+
+
+   
+    </body>
+
+    
+
+    <script>
+		
+		window.onload = function() {
+			// var ctx = document.getElementById('canvas').getContext('2d');
+			// var chart = new Chart(ctx, {
+			// 	type: 'pie',
+			// 	data: {
+            //                       labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+            //                       datasets: [{
+            //                           label: '# of Votes',
+            //                           data: [12, 19, 3, 5, 2,],
+            //                           backgroundColor: [
+            //                               'rgba(54, 162, 235, 0.2)',
+            //                               'rgba(255, 206, 86, 0.2)',
+            //                               'rgba(75, 192, 192, 0.2)',
+            //                               'rgba(153, 102, 255, 0.2)',
+                                          
+            //                           ],
+            //                           borderColor: [
+            //                               'rgba(255, 99, 132, 1)',
+            //                               'rgba(54, 162, 235, 1)',
+            //                               'rgba(255, 206, 86, 1)',
+            //                               'rgba(75, 192, 192, 1)',
+            //                               'rgba(153, 102, 255, 1)',
+                                         
+            //                           ],
+            //                           borderWidth: 1
+            //                       }]
+            //                   },
+			// 	options: {
+			// 		responsive: true,
+			// 		maintainAspectRatio: false,
+			// 		legend: {
+			// 			position: 'top',
+			// 		},
+			// 		title: {
+			// 			display: true,
+			// 			text: 'Chart.js Bar Chart'
+			// 		}
+			// 	}
+			// });
+
+            var ctx = document.getElementById('canvas2').getContext('2d');
+			var chart2 = new Chart(ctx, {
+				type: 'line',
+				data: {
+                                  labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+                                  datasets: [{
+                                      label: '# of Votes',
+                                      data: [12, 19, 3, 5, 2,],
+                                      backgroundColor: [
+                                          'rgba(54, 162, 235, 0.2)',
+                                          'rgba(255, 206, 86, 0.2)',
+                                          'rgba(75, 192, 192, 0.2)',
+                                          'rgba(153, 102, 255, 0.2)',
+                                          
+                                      ],
+                                      borderColor: [
+                                          'rgba(255, 99, 132, 1)',
+                                          'rgba(54, 162, 235, 1)',
+                                          'rgba(255, 206, 86, 1)',
+                                          'rgba(75, 192, 192, 1)',
+                                          'rgba(153, 102, 255, 1)',
+                                         
+                                      ],
+                                      borderWidth: 1
+                                  }]
+                              },
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					legend: {
+						position: 'top',
+					},
+					title: {
+						display: true,
+						text: 'Chart.js Bar Chart'
+					}
+				}
+			});
+
+		};
+
+		
+
+	
+		
+		
+		
+	</script>
+   
+
+  
+
+    <script>
+        $(window).on("load", function() {
+            $(".loading").hide();
+        
+      
+      
+        })
+    </script>
+    <script>
+        function togglePopup(){
+            document.getElementById("popup-1").classList.toggle("active");
+            console.log("hello");
+        }
+
+        function togglePopup2(){
+            console.log("clicked")
+            document.getElementById("popup-2").classList.toggle("active");
+            var x = document.getElementById("nav");
+            if (x.style.display === "none") {
+                x.style.display = "flex";
+            } else {
+                x.style.display = "none";
+            }
+           
+        }
+
+    </script>
+   
+    <script>
+       
+        $(window).on("load",function(){
+          $(".loader-wrapper").fadeOut(1200);
+          
+        });
+    </script>
+        
+    <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.1.0/dist/jdenticon.min.js"></script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -161,12 +161,10 @@ h2 {
   text-decoration: none !important; }
   .btn.btn-facebook {
     display: block;
-    background: rgb(12, 13, 63);
-    border: 0.5px solid rgba(0, 225, 255, 0.979);
+    background: #3b5998;
     color: #fff; }
   .btn.btn-google {
-    background: rgb(4, 6, 53);
-    border: 0.5px solid rgba(255, 0, 221, 0.979);
+    background: #ea4335;
     color: #fff; }
 
 

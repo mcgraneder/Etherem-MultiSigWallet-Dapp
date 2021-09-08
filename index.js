@@ -1,13 +1,16 @@
-import data from './build/contracts/MultiSigWallet.json' assert { type: "json" };
+import data from './build/contracts/MultiSigFactory.json' assert { type: "json" };
+import data1  from './build/contracts/MultiSigWallet.json' assert { type: "json" };
 
 Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application id from moralis.io
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
 
 //0x9Dad734fEC00e2b1aE42DFA2eaf26a40eE31aFB1
+var add2 = "0x283dc068050f9050bC467762F48C43966a176342"
 var owners = ["0x55DC41A449452d6e1A8fE915bBb607D97678263B", "0xF367CCe608Abe92370C5eA151ed9510438ebD61f", "0xBFb5a2d6353Eb76DF2A185d653332d2002521c52"]
 var account = "";
 var account = "";
 var contractInstance = "";
+var contractFactoryInstance = "";
 var quickSelect
 var currentSelectedToken
 // var currentSelectedToken = "ETH"
@@ -19,9 +22,9 @@ var currentSelectedToken
 //                FUNCTIONS FOR LOAD DAPP DATA ON PAGE LOAD                                                           //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-//The init() function is called on page load and connects to metamask in order to connect our broweser to
-//the ethereum blockchain. If no current provider is found an error message is alerted letting the user
-//know than a non ethereum browser has been detected
+// The init() function is called on page load and connects to metamask in order to connect our broweser to
+// the ethereum blockchain. If no current provider is found an error message is alerted letting the user
+// know than a non ethereum browser has been detected
 // function yourFunction(){
 //   // do whatever you like here
 //   // loadBlockchainData()
@@ -39,20 +42,20 @@ var currentSelectedToken
 
 // yourFunction();
 
-// async function login(){
-//   console.log("login clicked");
+async function login(){
+  console.log("login clicked");
   
-//   // document.getElementById(currentSelectedSection).style.display = "none";
-//   var user = await Moralis.Web3.authenticate();
-//   if(user){
-//     document.getElementById(currentSelectedSection).style.display = "block";
-//     loadBlockchainData()
-//     console.log(user);
-//     user.set("nickname","VITALIK");
-//     user.set("fav_color","blue");
-//     user.save();
-//   }
-// }
+  // document.getElementById(currentSelectedSection).style.display = "none";
+  var user = await Moralis.Web3.authenticate();
+  if(user){
+    document.getElementById(currentSelectedSection).style.display = "block";
+    loadBlockchainData()
+    console.log(user);
+    user.set("nickname","VITALIK");
+    user.set("fav_color","blue");
+    user.save();
+  }
+}
 // const login1 = document.getElementById("remove-user-from-wallet")
 // login1.onclick = login()
 
@@ -90,10 +93,47 @@ var pageLoadObject = {'section': "admin-section"}
 var retrievedSectionObject = localStorage.getItem('pageLoadObject');
 var currentSelectedSection = JSON.parse(retrievedSectionObject).section
 console.log('retrievedSectionObject: ', JSON.parse(retrievedSectionObject).section)
-//the loadBlockchainData() function loads al Dapp information on the page load. We initialisise
-//a connection to our smart contract and get the users ethereum account so that we can call the
-//functions defined in our smart contract. Other information like user data such as
-//transaction histroy is also extracted from the BC and loaded using this function
+// the loadBlockchainData() function loads al Dapp information on the page load. We initialisise
+// a connection to our smart contract and get the users ethereum account so that we can call the
+// functions defined in our smart contract. Other information like user data such as
+// transaction histroy is also extracted from the BC and loaded using this function
+async function loadFactory() {
+  const web3 = window.web3
+
+  //gets all user accounts and displays the current user on the UI (navbar)
+  var accounts = await web3.eth.getAccounts()
+  account = accounts[0];    
+ 
+  
+  const networkId = await web3.eth.net.getId()
+  const networkData = data.networks[networkId]
+  if(networkData) {
+    contractFactoryInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
+    console.log("the smart contract is " + networkData.address);
+    console.log(contractFactoryInstance)
+      
+  } else {
+    window.alert('contract not deployed to detected network.')
+    
+  }
+
+  var results = await contractFactoryInstance.getPastEvents("multisigInstanceCreated", {fromBlock: 0}).then(function(result) {
+        console.log(result)
+      })
+
+
+
+}
+
+async function getMultiSigInstnaces() {
+
+  await contractFactoryInstance.methods.createMultiSig().send({from: account})
+
+  await contractFactoryInstance.getPastEvents("multisigInstanceCreated", {fromBlock: 0}).then(function(result) {
+    console.log(result)
+  })
+
+}
 async function loadBlockchainData() {
 
   const web3 = window.web3
@@ -110,10 +150,10 @@ async function loadBlockchainData() {
     //gets the current network tableRowIndex (e.g ropsten, kovan, mainnet) and uses the contract abi imported at the
     //top of this file to make a new contract instamce using web3.js new contract function. 
     const networkId = await web3.eth.net.getId()
-    const networkData = data.networks[networkId]
+    const networkData = data1.networks[networkId]
     if(networkData) {
-      contractInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
-      console.log("the smart contract is " + networkData.address);
+      contractInstance = new web3.eth.Contract(data1.abi, "0xf4bfDA40e4D64CE605B0094C5483538a2a47E969", {from: account})
+      console.log("the smart contract is " + "0xf4bfDA40e4D64CE605B0094C5483538a2a47E969");
       console.log(contractInstance)
         
     } else {
@@ -123,22 +163,25 @@ async function loadBlockchainData() {
 
     document.getElementById("display-wallet-id").innerHTML = "Wallet tableRowIndex: 1";
     displayBalance();
+    loadPendingTransfers()
     loadAccountsTables("transferRequestApproved")
     loadAccountsTables("transferRequestCancelled")
     loadAdminTables("fundsDeposited")
     loadAdminTables("fundsWithdrawed")
     loadWalletOwners()
-    loadPendingTransfers()
     loadChart()
   }
   else {
     console.log("you do not own this wallet")
+    
     document.getElementById("accounts-section").style.display = "none";
     document.getElementById("transfer-section").style.display = "none";
     document.getElementById("admin-section").style.display = "none";
     document.getElementById("stats-section").style.display = "none";
     document.getElementById(currentSelectedSection).style.display = "none";
-    return
+    window.location.href = "index.html"
+    console.log("check")
+    // return
   }
 
   
@@ -149,8 +192,9 @@ async function loadBlockchainData() {
 
 
 loadWeb3();
-// login()
-loadBlockchainData();
+
+loadFactory();
+loadBlockchainData()
 
 // addPendingTranferToTable.innerHTML = ""
 async function loadWalletOwners() {

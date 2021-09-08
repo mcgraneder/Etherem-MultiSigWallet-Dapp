@@ -15,8 +15,8 @@ contract MultiSigWallet {
     uint256 public withdrawalId = 0;
     uint256 public transferId = 0;
 
-    constructor() {
-        mainOwner = msg.sender;
+    constructor(address _owner) {
+        mainOwner = _owner;
         owners.push(mainOwner);
     }
     
@@ -338,4 +338,17 @@ contract MultiSigWallet {
        
         return transferRequests;
     }
+}
+
+contract MultiSigFactory {
+    
+    MultiSigWallet[] public multisigInstances;
+    event multisigInstanceCreated(uint date, address walletOwner, address multiSigAddress);
+    
+    function createMultiSig() public {
+        MultiSigWallet newWalletInstance = new MultiSigWallet(msg.sender);
+        multisigInstances.push(newWalletInstance);
+        emit multisigInstanceCreated(block.timestamp, msg.sender, address(newWalletInstance));
+    }
+    
 }
