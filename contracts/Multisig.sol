@@ -342,13 +342,37 @@ contract MultiSigWallet {
 
 contract MultiSigFactory {
     
+     struct UserWallets{
+        address walletAddress;
+    }
+
+    UserWallets[] public wallets;
+    mapping(address => UserWallets[]) userWallet;
+
     MultiSigWallet[] public multisigInstances;
     event multisigInstanceCreated(uint date, address walletOwner, address multiSigAddress);
+    event walletOwnerAdded(address owner, address mutliSigAddress);
     
     function createMultiSig() public {
         MultiSigWallet newWalletInstance = new MultiSigWallet(msg.sender);
         multisigInstances.push(newWalletInstance);
+        
+        UserWallets[] storage newWallet = userWallet[msg.sender];
+        newWallet.push(UserWallets(address(newWalletInstance)));
+        
         emit multisigInstanceCreated(block.timestamp, msg.sender, address(newWalletInstance));
+
+    }
+    
+    function getUserWallets() public view returns (UserWallets[] memory wals) {
+        return userWallet[msg.sender];
+    }
+    
+    function addOwner(address account, address walletAddres) public {
+        
+        UserWallets[] storage newWallet = userWallet[account];
+        newWallet.push(UserWallets(walletAddres));
+        emit walletOwnerAdded(msg.sender, walletAddres);
     }
     
 }

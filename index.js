@@ -4,62 +4,14 @@ import data1  from './build/contracts/MultiSigWallet.json' assert { type: "json"
 Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application id from moralis.io
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
 
-//0x9Dad734fEC00e2b1aE42DFA2eaf26a40eE31aFB1
-var add2 = "0x283dc068050f9050bC467762F48C43966a176342"
-var owners = ["0x55DC41A449452d6e1A8fE915bBb607D97678263B", "0xF367CCe608Abe92370C5eA151ed9510438ebD61f", "0xBFb5a2d6353Eb76DF2A185d653332d2002521c52"]
-var account = "";
-var account = "";
 var contractInstance = "";
 var contractFactoryInstance = "";
+var account = ""
 var quickSelect
 var currentSelectedToken
-// var currentSelectedToken = "ETH"
-//fix contract to make events time the same name
-//fix line 598 have result of id be the index not tx id
-//connect browser to blockchain through metamask
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //   
-//                FUNCTIONS FOR LOAD DAPP DATA ON PAGE LOAD                                                           //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-// The init() function is called on page load and connects to metamask in order to connect our broweser to
-// the ethereum blockchain. If no current provider is found an error message is alerted letting the user
-// know than a non ethereum browser has been detected
-// function yourFunction(){
-//   // do whatever you like here
-//   // loadBlockchainData()
-//   var tableHeaderRowCount = 1;
-//   var table = document.getElementById('customerrrs');
-//   var rowCount = table.rows.length;
-//   for (var i = tableHeaderRowCount; i < rowCount; i++) {
-//       table.deleteRow(tableHeaderRowCount);
-//   }
-//   loadPendingTransfers()
-//   setTimeout(yourFunction, 5000);
- 
-  
-// }
 
-// yourFunction();
 
-async function login(){
-  console.log("login clicked");
-  
-  // document.getElementById(currentSelectedSection).style.display = "none";
-  var user = await Moralis.Web3.authenticate();
-  if(user){
-    document.getElementById(currentSelectedSection).style.display = "block";
-    loadBlockchainData()
-    console.log(user);
-    user.set("nickname","VITALIK");
-    user.set("fav_color","blue");
-    user.save();
-  }
-}
-// const login1 = document.getElementById("remove-user-from-wallet")
-// login1.onclick = login()
 
-var tableRowIndex;
 async function loadWeb3() {
   if (window.ethereum) {
     window.web3 = new Web3(window.ethereum)
@@ -97,6 +49,21 @@ console.log('retrievedSectionObject: ', JSON.parse(retrievedSectionObject).secti
 // a connection to our smart contract and get the users ethereum account so that we can call the
 // functions defined in our smart contract. Other information like user data such as
 // transaction histroy is also extracted from the BC and loaded using this function
+
+var currentLoggedInUserObject 
+// Retrieve the object from storage
+var retrieveCurrentLoggedInUser = localStorage.getItem('currentLoggedInUserObject');
+var currentLoggedInUser = JSON.parse(retrieveCurrentLoggedInUser).user
+console.log('retrieveCurrentLoggedInUser: ', JSON.parse(retrieveCurrentLoggedInUser).user);
+console.log(currentLoggedInUser)
+
+// Retrieve the object from storage
+var retrievedUserWalletObject = localStorage.getItem('userWalletObject');
+var currentSelectedWallet = JSON.parse(retrievedUserWalletObject).wallet
+console.log('retrievedWalletObject: ', JSON.parse(retrievedUserWalletObject).wallet);
+console.log("the current wallet is" + currentSelectedWallet)
+
+
 async function loadFactory() {
   const web3 = window.web3
 
@@ -116,24 +83,10 @@ async function loadFactory() {
     window.alert('contract not deployed to detected network.')
     
   }
-
-  var results = await contractFactoryInstance.getPastEvents("multisigInstanceCreated", {fromBlock: 0}).then(function(result) {
-        console.log(result)
-      })
-
-
-
 }
 
-async function getMultiSigInstnaces() {
 
-  await contractFactoryInstance.methods.createMultiSig().send({from: account})
 
-  await contractFactoryInstance.getPastEvents("multisigInstanceCreated", {fromBlock: 0}).then(function(result) {
-    console.log(result)
-  })
-
-}
 async function loadBlockchainData() {
 
   const web3 = window.web3
@@ -144,7 +97,7 @@ async function loadBlockchainData() {
   document.getElementById("display-address").innerHTML = "Account: " + account.slice(0, 6) + "..";
  
   
-  if (owners.includes(account)) {
+  
 
     console.log("you do own this wallet")
     //gets the current network tableRowIndex (e.g ropsten, kovan, mainnet) and uses the contract abi imported at the
@@ -152,16 +105,21 @@ async function loadBlockchainData() {
     const networkId = await web3.eth.net.getId()
     const networkData = data1.networks[networkId]
     if(networkData) {
-      contractInstance = new web3.eth.Contract(data1.abi, "0xf4bfDA40e4D64CE605B0094C5483538a2a47E969", {from: account})
-      console.log("the smart contract is " + "0xf4bfDA40e4D64CE605B0094C5483538a2a47E969");
+      
+      contractInstance = new web3.eth.Contract(data1.abi, currentSelectedWallet, {from: account})
+      console.log("the smart contract is " + currentSelectedWallet);
       console.log(contractInstance)
+
+      
         
     } else {
       window.alert('contract not deployed to detected network.')
       
     }
 
-    document.getElementById("display-wallet-id").innerHTML = "Wallet tableRowIndex: 1";
+  
+  
+    document.getElementById("display-wallet-id").innerHTML = "WalletID: 1";
     displayBalance();
     loadPendingTransfers()
     loadAccountsTables("transferRequestApproved")
@@ -169,36 +127,16 @@ async function loadBlockchainData() {
     loadAdminTables("fundsDeposited")
     loadAdminTables("fundsWithdrawed")
     loadWalletOwners()
-    loadChart()
-  }
-  else {
-    console.log("you do not own this wallet")
-    
-    document.getElementById("accounts-section").style.display = "none";
-    document.getElementById("transfer-section").style.display = "none";
-    document.getElementById("admin-section").style.display = "none";
-    document.getElementById("stats-section").style.display = "none";
-    document.getElementById(currentSelectedSection).style.display = "none";
-    window.location.href = "index.html"
-    console.log("check")
-    // return
-  }
-
-  
-
-  
-  
+    // loadChart()
 }
+ 
 
 
-loadWeb3();
-
-loadFactory();
-loadBlockchainData()
 
 // addPendingTranferToTable.innerHTML = ""
 async function loadWalletOwners() {
-  const owners = contractInstance.methods.getUsers().call().then(function(result) {
+  const owners = contractInstance.methods.getUsers().call({from: account}).then(function(result) {
+    console.log("the wallet owners are" + result)
     for (let i = 0; i < result.length; i++) {
           addUserToTable1.innerHTML += `
           <tr "class="tablerow">
@@ -307,11 +245,14 @@ function addUser(){
               <td ><span id=${addUserNullAddressField.value} class="testb">Remove</span></td>
           </tr>`
 
+          contractFactoryInstance.methods.addOwner(addUserNullAddressField.value, currentSelectedWallet).send({from: account})
+
       }).on("error", function(error) {
           var popupMessage = document.getElementById("msg").innerHTML = "User denied the tranaction";
           displayAddOwnerPopup(popupMessage);
           hideLoader();
       })
+
 }
 
 //function that lets the main wallet owner (contract deployer) remove a new wallet signatory
@@ -922,97 +863,13 @@ function toggleStatisticsSection() {
   retrievedSectionObject = localStorage.getItem('pageLoadObject');
   currentSelectedSection = JSON.parse(retrievedSectionObject).section
   console.log(currentSelectedSection)  
-  loadChart()
+  // loadChart()
           
         
 }
 
 
-function loadChart() {
-  
-  var ctx = document.getElementById('canvas').getContext('2d');
-			var chart = new Chart(ctx, {
-				type: 'pie',
-				data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
-                datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2,],
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        
-                    ],
-                    borderWidth: 1
-                }]
-            },
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					legend: {
-						position: 'top',
-					},
-					title: {
-						display: true,
-						text: 'Chart.js Bar Chart'
-					}
-				}
-      })
-    setTimeout(function(){
-      var ctx = document.getElementById('canvas2').getContext('2d');
-			var chart2 = new Chart(ctx, {
-				type: 'line',
-				data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
-                datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2,],
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        
-                    ],
-                    borderWidth: 1
-                }]
-            },
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					legend: {
-						position: 'top',
-					},
-					title: {
-						display: true,
-						text: 'Chart.js Bar Chart'
-					}
-				}
-			});
-                
-                      
-    }, 600);
-}
-const toggleStatistics = document.getElementById("toggle-stats-section");
-toggleStatistics.onclick = toggleStatisticsSection;
+
 
 ETH.onclick = function() {
   console.log("clicked ETH")
@@ -1123,5 +980,7 @@ transferInfo.addEventListener("click", showTxInformation);
 const CancelledTransferInfo = document.querySelectorAll("table")[5];
 CancelledTransferInfo.addEventListener("click", showTxInformation);
 
+loadWeb3();
 
-
+loadFactory();
+loadBlockchainData()
