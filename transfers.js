@@ -8,7 +8,7 @@ var contractInstance = "";
 var contractFactoryInstance = "";
 var account = ""
 var currentSelectedToken
-
+var quickSelect
 // Retrieve the object from storage
 var retrievedObject = localStorage.getItem('testObject');
 var currentSelectedToken = JSON.parse(retrievedObject).token
@@ -143,15 +143,15 @@ quickTransferApproveButton.onclick = approveTransferRequest
 
 function createTransferRequest() {
 
-  var receiverAddress1 = document.getElementById("create-transfer-reciever-address-field");
+  var receiverAddress = document.getElementById("create-transfer-reciever-address-field");
   var transferAmount = document.getElementById("create-transfer-amount-field");
 
-  if (receiverAddress1.value == "" || transferAmount.value == "" ) {
+  if (receiverAddress.value == "" || transferAmount.value == "" ) {
     document.getElementById("popup-1").classList.toggle("active");
     return;
   }
   
-  const createTransferRequest = contractInstance.methods.createTransfer(currentSelectedToken, web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress1.value).send({from: account}).on("transactionHash", function(hash) {
+  const createTransferRequest = contractInstance.methods.createTransfer(currentSelectedToken, web3.utils.toWei(String(transferAmount.value), "ether"), receiverAddress.value).send({from: account}).on("transactionHash", function(hash) {
     loadLoader();
   }).on("receipt", function(receipt) {
      
@@ -181,7 +181,7 @@ function createTransferRequest() {
 
 }
 
-
+var tableRowIndex
 async function cancelTransferRequest() {
  
   var transferID = document.getElementById("cancel-transfer-id-field");
@@ -491,3 +491,7 @@ transferInfo.addEventListener("click", showTxInformation);
 
 const CancelledTransferInfo = document.querySelectorAll("table")[5];
 CancelledTransferInfo.addEventListener("click", showTxInformation);
+
+loadWeb3();
+loadFactory();
+loadBlockchainData()
