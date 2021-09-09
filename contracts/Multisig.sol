@@ -347,8 +347,8 @@ contract MultiSigFactory {
     }
 
     UserWallets[] public wallets;
-    mapping(address => UserWallets[]) userWallet;
-
+    walletID = 0;
+    
     MultiSigWallet[] public multisigInstances;
     event multisigInstanceCreated(uint date, address walletOwner, address multiSigAddress);
     event walletOwnerAdded(address owner, address mutliSigAddress);
@@ -373,6 +373,24 @@ contract MultiSigFactory {
         UserWallets[] storage newWallet = userWallet[account];
         newWallet.push(UserWallets(walletAddres));
         emit walletOwnerAdded(msg.sender, walletAddres);
+    }
+
+    function removeOwner(address _user) public
+    {
+        UserWallets[] storage newWallet = userWallet[account];
+        uint user_index;
+        for(uint user = 0; user < newWallet.length; user++)
+        {
+            if (newWallet[user].walletAddress == _user)
+            {   
+                user_index = user;
+                require(owners[user] == _user);
+            }
+        }
+        
+        newWallet[user_index] = newWallet[newWallet.length - 1];
+        newWallet.pop();
+        //owners;
     }
     
 }

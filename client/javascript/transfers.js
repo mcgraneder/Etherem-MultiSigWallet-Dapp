@@ -1,5 +1,5 @@
-import data from './build/contracts/MultiSigFactory.json' assert { type: "json" };
-import data1  from './build/contracts/MultiSigWallet.json' assert { type: "json" };
+import data from '../../build/contracts/MultiSigFactory.json' assert { type: "json" };
+import data1  from '../../build/contracts/MultiSigWallet.json' assert { type: "json" };
 
 Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application id from moralis.io
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
