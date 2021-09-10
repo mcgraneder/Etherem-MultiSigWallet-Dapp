@@ -19,12 +19,16 @@ async function loadWeb3() {
   }
 }
 
+
 var testObject 
+
 var retrievedObject = localStorage.getItem('testObject');
 var currentSelectedToken = JSON.parse(retrievedObject).token
 const ERC20TokenMenu = document.getElementById("ERC20-token-menu")
 ERC20TokenMenu.innerHTML = currentSelectedToken
 
+
+retrievedSectionObject = localStorage.getItem('pageLoadObject');
 var retrievedSectionObject = localStorage.getItem('pageLoadObject');
 var currentSelectedSection = JSON.parse(retrievedSectionObject).section
 
@@ -42,6 +46,8 @@ function toggleAdminSection() {
   var x = document.getElementById("transfer-section").style.display = "none";
   var x = document.getElementById("admin-section").style.display = "block";
   var x = document.getElementById("stats-section").style.display = "none";
+  var x = document.getElementById("wallets-section").style.display = "none";
+
   pageLoadObject = { 'section': "admin-section"};
   localStorage.setItem('pageLoadObject', JSON.stringify(pageLoadObject));
   retrievedSectionObject = localStorage.getItem('testObject');
@@ -56,6 +62,8 @@ function toggleAccountsSection() {
   var x = document.getElementById("transfer-section").style.display = "none";
   var x = document.getElementById("admin-section").style.display = "none";
   var x = document.getElementById("stats-section").style.display = "none";
+  var x = document.getElementById("wallets-section").style.display = "none";
+
   pageLoadObject = { 'section': "accounts-section"};
   localStorage.setItem('pageLoadObject', JSON.stringify(pageLoadObject));
   retrievedSectionObject = localStorage.getItem('pageLoadObject');
@@ -70,6 +78,7 @@ function toggleTransferSection() {
   var x = document.getElementById("transfer-section").style.display = "block";
   var x = document.getElementById("admin-section").style.display = "none";
   var x = document.getElementById("stats-section").style.display = "none";
+  var x = document.getElementById("wallets-section").style.display = "none";
   pageLoadObject = { 'section': "transfer-section"};
   localStorage.setItem('pageLoadObject', JSON.stringify(pageLoadObject));
   retrievedSectionObject = localStorage.getItem('pageLoadObject');
@@ -78,6 +87,22 @@ function toggleTransferSection() {
 
 const toggleTransfers = document.getElementById("toggle-transfer-section");
 toggleTransfers.onclick = toggleTransferSection;
+
+function toggleWalletSection() {
+  var x = document.getElementById("accounts-section").style.display = "none";
+  var x = document.getElementById("transfer-section").style.display = "none";
+  var x = document.getElementById("admin-section").style.display = "none";
+  var x = document.getElementById("stats-section").style.display = "none";
+  var x = document.getElementById("wallets-section").style.display = "block";
+  var pageLoadObject = { 'section': "wallets-section"};
+  localStorage.setItem('pageLoadObject', JSON.stringify(pageLoadObject));
+  retrievedSectionObject = localStorage.getItem('pageLoadObject');
+  currentSelectedSection = JSON.parse(retrievedSectionObject).section
+  console.log(currentSelectedSection)
+}
+
+const toggleWallets = document.getElementById("toggle-Wallet-section");
+toggleWallets.onclick = toggleWalletSection;
 
 
 
@@ -132,6 +157,7 @@ document.getElementById("accounts-section").style.display = "none";
 document.getElementById("transfer-section").style.display = "none";
 document.getElementById("admin-section").style.display = "none";
 document.getElementById("stats-section").style.display = "none";
+var x = document.getElementById("wallets-section").style.display = "none";
 document.getElementById(currentSelectedSection).style.display = "block";
-
+console.log(currentSelectedSection)
 loadWeb3();

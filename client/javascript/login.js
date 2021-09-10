@@ -56,6 +56,8 @@ function setCurrentUser() {
 }
 var currentLoggedInUserObject 
 // Retrieve the object from storage
+currentLoggedInUserObject = { 'user': account.toString()};
+localStorage.setItem('currentLoggedInUserObject', JSON.stringify(currentLoggedInUserObject));
 var retrieveCurrentLoggedInUser = localStorage.getItem('currentLoggedInUserObject');
 var currentLoggedInUser = JSON.parse(retrieveCurrentLoggedInUser).user
 console.log('retrieveCurrentLoggedInUser: ', JSON.parse(retrieveCurrentLoggedInUser).user);

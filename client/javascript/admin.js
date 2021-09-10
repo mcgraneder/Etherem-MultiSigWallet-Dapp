@@ -106,7 +106,7 @@ function addUser(){
       return;
     }
 
-    contractInstance.methods.addUsers(addUserNullAddressField.value, "0x6b03982731d091763E685632A885c3503A5c3f35", currentSelectedWallet ).send({from: account}).on("transactionHash", function(hash) {
+    contractInstance.methods.addUsers(addUserNullAddressField.value, "0xcB6885a951d8B0c2fd60be380930092242E2c866", currentSelectedWallet ).send({from: account}).on("transactionHash", function(hash) {
           loadLoader();  
     }).on("receipt", function(receipt) {
           
@@ -152,7 +152,7 @@ async function removeUser(){
     }
   })
   
-  const removeUser = contractInstance.methods.removeUser(nullAddressField.value).send({from: account}).on("transactionHash", function(hash) {
+  const removeUser = contractInstance.methods.removeUser(nullAddressField.value, "0xcB6885a951d8B0c2fd60be380930092242E2c866", currentSelectedWallet).send({from: account}).on("transactionHash", function(hash) {
         loadLoader();  
 
     }).on("receipt", function(receipt) {
@@ -182,7 +182,7 @@ async function removeWallletOwner(e) {
     }
   })
 
-  const removeUser = contractInstance.methods.removeUser(ownerId).send({from: account}).on("transactionHash", function(hash) {
+  const removeUser = contractInstance.methods.removeUser(ownerId, "0xcB6885a951d8B0c2fd60be380930092242E2c866", currentSelectedWallet).send({from: account}).on("transactionHash", function(hash) {
         loadLoader();  
     }).on("receipt", function(receipt) {
        

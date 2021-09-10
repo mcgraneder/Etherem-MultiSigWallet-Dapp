@@ -85,13 +85,12 @@ async function loadFactory() {
   
   }
   
-  const createNewWalletButton = document.getElementById("create-new-wallet")
+  const createNewWalletButton = document.getElementById("create-new")
   createNewWalletButton.onclick = createNewWallet
 
-  const userWallets = document.querySelectorAll("table")[0];
-  userWallets.addEventListener("click", setCurrentWallet);
-// const userWallets = document.querySelectorAll("table")[7];
-// userWallets.addEventListener("click", setCurrentWallet);
+
+const userWallets = document.querySelectorAll("table")[7];
+userWallets.addEventListener("click", setCurrentWallet);
 
 function setCurrentWallet(e) {
     var id = e.target.id
