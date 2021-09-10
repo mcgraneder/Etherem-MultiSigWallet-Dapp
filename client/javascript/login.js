@@ -35,7 +35,7 @@ async function login(){
     var user = await Moralis.Web3.authenticate();
     if(user){
         setCurrentUser()
-        window.location.href = "/walletInterface.html"
+        window.location.href = "walletInterface.html"
         console.log(user);
         user.set("nickname","VITALIK");
         user.set("fav_color","blue");

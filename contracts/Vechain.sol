@@ -7,7 +7,7 @@ contract VeChain is ERC20 {
     //automatically mint eth on contratc creation
     constructor () ERC20("VeChain", "VET") {
 
-        _mint(msg.sender, 100000000);
+        _mint(msg.sender, 100000000000000000000);
     }
 
 }

@@ -45,9 +45,7 @@ async function loadFactory() {
   const networkData = data.networks[networkId]
   if(networkData) {
     contractFactoryInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
-    console.log("the smart contract is " + networkData.address);
-    console.log(contractFactoryInstance)
-      
+    
   } else {
     window.alert('contract not deployed to detected network.')
     
@@ -71,11 +69,7 @@ async function loadBlockchainData() {
     if(networkData) {
         
         contractInstance = new web3.eth.Contract(data1.abi, currentSelectedWallet, {from: account})
-        console.log("the smart contract is " + currentSelectedWallet);
-        console.log(contractInstance)
-
-        
-        
+      
     } else {
         window.alert('contract not deployed to detected network.')
         
@@ -113,7 +107,7 @@ async function loadPendingTransfers() {
     else if(tableName == "transferRequestCancelled") table = addCancelledTranferToTable
   
     var results = await contractInstance.getPastEvents(tableName,{fromBlock: 0}).then(function(result) {
-      console.log(result)
+     
       for (let i = 0; i < result.length; i++) {
         var amount = result[i].returnValues.amount / 10 ** 18;
         var date1 = new Date(result[i].returnValues.timeStamp * 1000);
@@ -129,6 +123,8 @@ async function loadPendingTransfers() {
       }
     })
   }
+
+  
 
   var quickTransferCancelButton = document.getElementById("quick-cancel")
 quickTransferCancelButton.onclick = cancelTransferRequest
@@ -172,6 +168,7 @@ function createTransferRequest() {
       })
       displayAddOwnerPopup(popupMessage);
       displayBalance()
+      window.location.reload(true)
     
   }).on("error", function(error) {
       var popupMessage = document.getElementById("msg").innerHTML = "User denied the transaction";
@@ -188,7 +185,7 @@ async function cancelTransferRequest() {
   if(quickSelect != true) {
     tableRowIndex = transferID.value
   }
-  var counter = 0;
+  var counter = 1;
   var btn = tableRowIndex
   
   const cancelTransferRequest = await contractInstance.methods.cancelTransfer(currentSelectedToken, btn).send({from: account}).on("transactionHash", function(hash) {
@@ -230,6 +227,7 @@ async function cancelTransferRequest() {
                 </tr>`    
           })
         }
+        displayBalance();
         addPendingTranferToTable.deleteRow(counter)
         quickSelect = false;
       })
@@ -259,8 +257,7 @@ async function approveTransferRequest(e) {
     loadLoader();
 
   }).on("confirmation", function(confirmationNr) {
-      console.log(confirmationNr);
-
+    
   }).on("receipt", function(receipt) {
     
       hideLoader();
@@ -291,8 +288,7 @@ async function approveTransferRequest(e) {
           ).then(function(result) {
 
             for (let i = 0; i < result.length; i++) {
-              console.log("the result isss")
-              console.log(result[i])
+      
               if(result[i].id == transferID.value) {
                 break;
               }
@@ -322,6 +318,7 @@ async function approveTransferRequest(e) {
           addPendingTranferToTable.deleteRow(counter);
         }  
       })
+      displayBalance()
   }).on("error", function(error) {
       console.log("user denied transaction");
       hideLoader();

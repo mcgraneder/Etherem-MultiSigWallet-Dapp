@@ -7,7 +7,7 @@ contract Link is ERC20 {
     //automatically mint eth on contratc creation
     constructor () ERC20("ChainLink", "LINK") {
 
-        _mint(msg.sender, 4000000000000000000);
+        _mint(msg.sender, 100000000000000000000);
     }
 
 }

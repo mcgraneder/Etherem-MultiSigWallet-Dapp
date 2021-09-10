@@ -20,6 +20,7 @@ var currentSelectedWallet = JSON.parse(retrievedUserWalletObject).wallet
 
 async function loadWeb3() {
   if (window.ethereum) {
+
     window.web3 = new Web3(window.ethereum)
     await window.ethereum.enable()
   }
@@ -44,9 +45,8 @@ async function loadFactory() {
   const networkId = await web3.eth.net.getId()
   const networkData = data.networks[networkId]
   if(networkData) {
+
     contractFactoryInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
-    console.log("the smart contract is " + networkData.address);
-    console.log(contractFactoryInstance)
       
   } else {
     window.alert('contract not deployed to detected network.')
@@ -70,12 +70,8 @@ async function loadBlockchainData() {
     const networkData = data1.networks[networkId]
     if(networkData) {
         
-        contractInstance = new web3.eth.Contract(data1.abi, currentSelectedWallet, {from: account})
-        console.log("the smart contract is " + currentSelectedWallet);
-        console.log(contractInstance)
-
-        
-        
+      contractInstance = new web3.eth.Contract(data1.abi, currentSelectedWallet, {from: account})
+       
     } else {
         window.alert('contract not deployed to detected network.')
         
@@ -210,9 +206,8 @@ function depositFunds(token) {
     
     updateAdminTables("fundsWithdrawed")
   }
+
   
-  //function that updates the deposit and wthdraw histroy tables in real time whenever the deposit or withdraw functions are
-  //called. These functions are called in the deposit and withdraw functions
   function updateAdminTables(eventName) {
   
     var table;
@@ -268,7 +263,7 @@ function depositFunds(token) {
     else if (event == "transfer-detail-table") {
       eventName = "transferRequestApproved"
       tableName = "Transfer tableRowIndex: "
-      console.log("success")
+    
     }
     else if(event =="cancelled-transfer-detail-table") {
       eventName = "transferRequestCancelled"
@@ -284,7 +279,7 @@ function depositFunds(token) {
       
       //here before we enter past events get table id.rows from DOM. Then predetermine the row index to save the below for loop
       for (let i = 0; i < result.length; i++ ) {
-          console.log(result)
+     
         if(result[i].returnValues.id == id) {
           hasBeenFound = true;
           break;
@@ -294,7 +289,7 @@ function depositFunds(token) {
       if(hasBeenFound == false) {
         return
       }
-      console.log(counter)
+    
       etherscanLink.setAttribute('href', "https://rinkeby.etherscan.io//tx/"+`${result[counter].transactionHash}`)
       div.appendChild(etherscanLink)
       var tx = web3.eth.getTransaction(result[counter].transactionHash).then(function(gas) {
@@ -361,13 +356,9 @@ function depositFunds(token) {
     },5000);
   }
   
-  function tableRowClicked(e) {
-    tableRowIndex = e.target.id;
-    quickSelect = true 
-    }
  
 
-    const addDepositToTable = document.querySelectorAll("tbody")[1];
+const addDepositToTable = document.querySelectorAll("tbody")[1];
 const addWithdrawalToTable = document.querySelectorAll("tbody")[2];
 
 const depositInfo = document.querySelectorAll("table")[1];

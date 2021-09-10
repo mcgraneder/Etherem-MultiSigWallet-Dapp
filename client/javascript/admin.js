@@ -45,9 +45,7 @@ async function loadFactory() {
   const networkData = data.networks[networkId]
   if(networkData) {
     contractFactoryInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
-    console.log("the smart contract is " + networkData.address);
-    console.log(contractFactoryInstance)
-      
+    
   } else {
     window.alert('contract not deployed to detected network.')
     
@@ -71,11 +69,7 @@ async function loadBlockchainData() {
     if(networkData) {
         
         contractInstance = new web3.eth.Contract(data1.abi, currentSelectedWallet, {from: account})
-        console.log("the smart contract is " + currentSelectedWallet);
-        console.log(contractInstance)
-
-        
-        
+     
     } else {
         window.alert('contract not deployed to detected network.')
         
@@ -89,8 +83,8 @@ async function loadBlockchainData() {
 
 
 async function loadWalletOwners() {
+
   const owners = contractInstance.methods.getUsers().call({from: account}).then(function(result) {
-    console.log("the wallet owners are" + result)
     for (let i = 0; i < result.length; i++) {
           addUserToTable1.innerHTML += `
           <tr "class="tablerow">
@@ -112,7 +106,7 @@ function addUser(){
       return;
     }
 
-    contractInstance.methods.addUsers(addUserNullAddressField.value).send({from: account}).on("transactionHash", function(hash) {
+    contractInstance.methods.addUsers(addUserNullAddressField.value, "0x6b03982731d091763E685632A885c3503A5c3f35", currentSelectedWallet ).send({from: account}).on("transactionHash", function(hash) {
           loadLoader();  
     }).on("receipt", function(receipt) {
           
@@ -127,7 +121,7 @@ function addUser(){
               <td ><span id=${addUserNullAddressField.value} class="testb">Remove</span></td>
           </tr>`
 
-          contractFactoryInstance.methods.addOwner(addUserNullAddressField.value, currentSelectedWallet).send({from: account})
+          // contractFactoryInstance.methods.addOwner(addUserNullAddressField.value, currentSelectedWallet).send({from: account})
 
       }).on("error", function(error) {
           var popupMessage = document.getElementById("msg").innerHTML = "User denied the tranaction";
