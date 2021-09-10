@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "compile:sass": "sass --watch scss:assets/css"
+    "compile:sass": "sass client/css/assets/css/style.css"
   },
   "author": "Evan McGrane",
   "license": "ISC",
