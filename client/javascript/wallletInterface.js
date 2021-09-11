@@ -36,7 +36,7 @@ async function loadFactory() {
     account = currentLoggedInUser
     console.log("your account is " + account)    
    
-    
+    document.getElementById("display-address").innerHTML = "Account: " + account.slice(0, 6) + "..";
     const networkId = await web3.eth.net.getId()
     const networkData = data.networks[networkId]
     if(networkData) {
@@ -47,19 +47,18 @@ async function loadFactory() {
       
     }
 
-    var walletID = 0
+   
     await contractFactoryInstance.methods.getUserWallets().call().then(function(result) {
-      console.log("the user wallets are" + result)
       for(let i = 0; i < result.length; i++) {
           console.log(result)
         userWallets.innerHTML += `
         <tr "class="tablerow">
-            <td>${walletID}</td>
+            <td>${result[i].walletID}</td>
             <td id="${result[i].walletAddress}">${result[i].walletAddress}</td>
            
             
         </tr>`  
-        walletID++  
+        
       }
     })
   
@@ -73,15 +72,13 @@ async function loadFactory() {
         var walletID = result.length - 1
         userWallets.innerHTML += `
           <tr "class="tablerow">
-              <td>${walletID}</td>
+              <td>${result[result.length - 1].walletID}</td>
               <td id="${result[result.length - 1].walletAddress}">${result[result.length - 1].walletAddress}</td>
              
               
           </tr>`  
       })
     })
-  
-      
   
   }
   
@@ -109,15 +106,8 @@ function setCurrentWallet(e) {
 }
   
 var userWalletObject 
-// Retrieve the object from storage
-// var retrievedUserWalletObject = localStorage.getItem('userWalletObject');
-// var currentSelectedWallet = JSON.parse(retrievedUserWalletObject).wallet
-// console.log('retrievedWalletObject: ', JSON.parse(retrievedUserWalletObject).wallet);
-// console.log("the current wallet is" + currentSelectedWallet)
 
 
-
-var currentLoggedInUserObject 
 // Retrieve the object from storage
 var retrieveCurrentLoggedInUser = localStorage.getItem('currentLoggedInUserObject');
 var currentLoggedInUser = JSON.parse(retrieveCurrentLoggedInUser).user

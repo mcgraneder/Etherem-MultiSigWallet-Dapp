@@ -5,8 +5,11 @@ Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application i
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
 
 var currentSelectedToken
+var account
+var contractFactoryInstance
+var contractInstance
 
-async function loadWeb3() {
+export async function loadWeb3() {
   if (window.ethereum) {
     window.web3 = new Web3(window.ethereum)
     await window.ethereum.enable()
@@ -19,9 +22,71 @@ async function loadWeb3() {
   }
 }
 
+var retrieveCurrentLoggedInUser = localStorage.getItem('currentLoggedInUserObject');
+var currentLoggedInUser = JSON.parse(retrieveCurrentLoggedInUser).user
+
+export async function loadFactory() {
+  const web3 = window.web3
+
+  //gets all user accounts and displays the current user on the UI (navbar)
+  var accounts = await web3.eth.getAccounts()
+  account = currentLoggedInUser;    
+ 
+  
+  const networkId = await web3.eth.net.getId()
+  const networkData = data.networks[networkId]
+  
+  if(networkData) {
+
+    contractFactoryInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
+      
+  } else {
+    window.alert('contract not deployed to detected network.')
+    
+  }
+
+  await contractFactoryInstance.methods.getWalletID(currentSelectedWallet).call().then(function(result) {
+    document.getElementById("display-wallet-id").innerHTML = "Wallet ID: " + result;
+
+  })
+
+}
+
+export async function loadBlockchainData() {
+
+  const web3 = window.web3
+
+  //gets all user accounts and displays the current user on the UI (navbar)
+  var accounts = await web3.eth.getAccounts()
+  account = currentLoggedInUser;;    
+  document.getElementById("display-address").innerHTML = "Account: " + account.slice(0, 6) + "..";
+
+  const networkId = await web3.eth.net.getId()
+  const networkData = data1.networks[networkId]
+  if(networkData) {
+      
+    contractInstance = new web3.eth.Contract(data1.abi, currentSelectedWallet, {from: account})
+     
+  } else {
+      window.alert('contract not deployed to detected network.')
+      
+  }
+
+  displayBalance()
+
+  
+}
+
+function displayBalance() {
+  const balance = contractInstance.methods.getAccountBalance(currentSelectedToken).call().then(function(balance) {
+    balance = balance / 10 ** 18;
+    balance = balance.toFixed(3)
+    document.getElementById("display-balance").innerHTML = "balance: " + balance + " " + currentSelectedToken;
+  })
+}
 
 var testObject 
-
+var pageLoadObject
 var retrievedObject = localStorage.getItem('testObject');
 var currentSelectedToken = JSON.parse(retrievedObject).token
 const ERC20TokenMenu = document.getElementById("ERC20-token-menu")
@@ -32,9 +97,7 @@ retrievedSectionObject = localStorage.getItem('pageLoadObject');
 var retrievedSectionObject = localStorage.getItem('pageLoadObject');
 var currentSelectedSection = JSON.parse(retrievedSectionObject).section
 
-var currentLoggedInUserObject 
-var retrieveCurrentLoggedInUser = localStorage.getItem('currentLoggedInUserObject');
-var currentLoggedInUser = JSON.parse(retrieveCurrentLoggedInUser).user
+
 
 
 var retrievedUserWalletObject = localStorage.getItem('userWalletObject');
@@ -94,7 +157,7 @@ function toggleWalletSection() {
   var x = document.getElementById("admin-section").style.display = "none";
   var x = document.getElementById("stats-section").style.display = "none";
   var x = document.getElementById("wallets-section").style.display = "block";
-  var pageLoadObject = { 'section': "wallets-section"};
+  pageLoadObject = { 'section': "wallets-section"};
   localStorage.setItem('pageLoadObject', JSON.stringify(pageLoadObject));
   retrievedSectionObject = localStorage.getItem('pageLoadObject');
   currentSelectedSection = JSON.parse(retrievedSectionObject).section
@@ -161,3 +224,6 @@ var x = document.getElementById("wallets-section").style.display = "none";
 document.getElementById(currentSelectedSection).style.display = "block";
 console.log(currentSelectedSection)
 loadWeb3();
+loadFactory()
+loadBlockchainData()
+// displayBalance()

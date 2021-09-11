@@ -1,6 +1,6 @@
 import data from '../../build/contracts/MultiSigFactory.json' assert { type: "json" };
 import data1  from '../../build/contracts/MultiSigWallet.json' assert { type: "json" };
-
+import { loadWeb3, loadFactory } from "./index.js"
 Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application id from moralis.io
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
 
@@ -8,6 +8,7 @@ var contractInstance = "";
 var contractFactoryInstance = "";
 var account = ""
 var currentSelectedToken
+
 
 // Retrieve the object from storage
 var retrievedObject = localStorage.getItem('testObject');
@@ -18,43 +19,11 @@ var retrievedUserWalletObject = localStorage.getItem('userWalletObject');
 var currentSelectedWallet = JSON.parse(retrievedUserWalletObject).wallet
 
 
-async function loadWeb3() {
-  if (window.ethereum) {
+var retrieveCurrentLoggedInUser = localStorage.getItem('currentLoggedInUserObject');
+var currentLoggedInUser = JSON.parse(retrieveCurrentLoggedInUser).user
 
-    window.web3 = new Web3(window.ethereum)
-    await window.ethereum.enable()
-  }
-  else if (window.web3) {
-    window.web3 = new Web3(window.web3.currentProvider)
-  }
-  else {
-    window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
-  }
-}
+
 var testObject 
-
-
-async function loadFactory() {
-  const web3 = window.web3
-
-  //gets all user accounts and displays the current user on the UI (navbar)
-  var accounts = await web3.eth.getAccounts()
-  account = accounts[0];    
- 
-  
-  const networkId = await web3.eth.net.getId()
-  const networkData = data.networks[networkId]
-  if(networkData) {
-
-    contractFactoryInstance = new web3.eth.Contract(data.abi, networkData.address, {from: account})
-      
-  } else {
-    window.alert('contract not deployed to detected network.')
-    
-  }
-}
-
-
 
 async function loadBlockchainData() {
 
@@ -62,7 +31,7 @@ async function loadBlockchainData() {
 
     //gets all user accounts and displays the current user on the UI (navbar)
     var accounts = await web3.eth.getAccounts()
-    account = accounts[0];    
+    account = currentLoggedInUser;;    
     document.getElementById("display-address").innerHTML = "Account: " + account.slice(0, 6) + "..";
  
     
@@ -77,8 +46,8 @@ async function loadBlockchainData() {
         
     }
 
-    document.getElementById("display-wallet-id").innerHTML = "WalletID: 1";
-    displayBalance();
+    // document.getElementById("display-wallet-id").innerHTML = "WalletID: 1";
+   
     loadAdminTables("fundsDeposited")
     loadAdminTables("fundsWithdrawed")
 }
@@ -375,10 +344,7 @@ withdrawFromWallet.onclick = withdrawFunds;
 
 const showDepositInfo = document.querySelectorAll("tbody")[6];
 
-loadWeb3();
 
-loadFactory();
-loadBlockchainData()
 
 function togglePopup2(){
 
@@ -398,4 +364,8 @@ function togglePopup2(){
     all_links[all_links.length - 1].removeAttribute("href");
     all_links[all_links.length - 1].innerHTML = ""
   }
-  
+  loadWeb3();
+
+loadFactory();
+loadBlockchainData()
+// console.log("the factory adress is " + factoryAddress)

@@ -1,7 +1,7 @@
 
 import data from '../../build/contracts/MultiSigFactory.json' assert { type: "json" };
 import data1  from '../../build/contracts/MultiSigWallet.json' assert { type: "json" };
-
+import { loadWeb3  } from "./index.js"
 Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application id from moralis.io
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
 
@@ -14,18 +14,8 @@ var account;
 var contractFactoryInstance = "";
 var currentSelectedWallet
 
-async function loadWeb3() {
-    if (window.ethereum) {
-        window.web3 = new Web3(window.ethereum)
-        await window.ethereum.enable()
-    }
-    else if (window.web3) {
-        window.web3 = new Web3(window.web3.currentProvider)
-    }
-    else {
-        window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
-    }
-}
+
+
 
 
 async function loadFactory() {
@@ -34,6 +24,7 @@ async function loadFactory() {
     //gets all user accounts and displays the current user on the UI (navbar)
     var accounts = await web3.eth.getAccounts()
     account = currentLoggedInUser
+    console.log(currentLoggedInUser)
     console.log("your account is " + account)    
    
     
@@ -47,19 +38,19 @@ async function loadFactory() {
       
     }
 
-    var walletID = 0
+  
     await contractFactoryInstance.methods.getUserWallets().call().then(function(result) {
       console.log("the user wallets are" + result)
       for(let i = 0; i < result.length; i++) {
           console.log(result)
         userWallets.innerHTML += `
         <tr "class="tablerow">
-            <td>${walletID}</td>
+            <td>${result[i].walletID}</td>
             <td id="${result[i].walletAddress}">${result[i].walletAddress}</td>
            
             
         </tr>`  
-        walletID++  
+       
       }
     })
   
@@ -73,7 +64,7 @@ async function loadFactory() {
         var walletID = result.length - 1
         userWallets.innerHTML += `
           <tr "class="tablerow">
-              <td>${walletID}</td>
+              <td>${result[result.length - 1].walletID}</td>
               <td id="${result[result.length - 1].walletAddress}">${result[result.length - 1].walletAddress}</td>
              
               
@@ -100,6 +91,9 @@ function setCurrentWallet(e) {
     localStorage.setItem('userWalletObject', JSON.stringify(userWalletObject));
     var retrievedUserWalletObject = localStorage.getItem('userWalletObject');
     currentSelectedWallet = JSON.parse(retrievedUserWalletObject).wallet
+
+    var pageLoadObject = { 'section': "admin-section"};
+    localStorage.setItem('pageLoadObject', JSON.stringify(pageLoadObject));
 
     setTimeout(function(){
         window.location.href = "/multisig.html"

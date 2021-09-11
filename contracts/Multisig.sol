@@ -129,7 +129,7 @@ contract MultiSigWallet {
     }
     
     //remove user require the address we pass in is the address were removing
-    function removeUser(address _user) public onlyOwners
+    function removeUser(address _user, address _address, address walletAddress) public onlyOwners
     {
         uint user_index;
         for(uint user = 0; user < owners.length; user++)
@@ -146,7 +146,7 @@ contract MultiSigWallet {
         limit= owners.length - 1;
         
         setWalletAddress(_address);
-        callAddOwner(_owners, walletAddress );
+        callRemoveOwner(_user, walletAddress );
     }
     
     
@@ -347,8 +347,10 @@ contract MultiSigFactory {
      struct UserWallets{
 
         address walletAddress;
+        uint walletID;
     }
 
+    uint id = 0;
     UserWallets[] public wallets;
     MultiSigWallet[] public multisigInstances;
 
@@ -361,10 +363,10 @@ contract MultiSigFactory {
         multisigInstances.push(newWalletInstance);
         
         UserWallets[] storage newWallet = userWallet[msg.sender];
-        newWallet.push(UserWallets(address(newWalletInstance)));
+        newWallet.push(UserWallets(address(newWalletInstance), id));
         
         emit multisigInstanceCreated(block.timestamp, msg.sender, address(newWalletInstance));
-
+        id++;
     }
     
     function getUserWallets() public view returns (UserWallets[] memory wals) {
@@ -374,20 +376,33 @@ contract MultiSigFactory {
     function addOwner(address account, address walletAddres) public {
         
         UserWallets[] storage newWallet = userWallet[account];
-        newWallet.push(UserWallets(walletAddres));
+        newWallet.push(UserWallets(walletAddres, id));
       
+    }
+    
+    function getWalletID(address walletAddres) public view returns (uint) {
+        
+        uint walletId;
+        UserWallets[] storage newWallet = userWallet[msg.sender];
+        for (uint i = 0; i < newWallet.length; i ++) {
+            if (newWallet[i].walletAddress == walletAddres){
+                walletId = newWallet[i].walletID;
+            }
+        }
+        
+        
+        return walletId;
     }
 
     function removeOwner(address account, address walletAddres) public {
         
         UserWallets[] storage newWallet = userWallet[account];
-        newWallet.push(UserWallets(walletAddres));
-
+       
         uint walletIndex;
         bool hasBeenFound = false;
         for(uint i = 0; i < newWallet.length; i++)
         {
-            if (newWallet[i].walletAddress == account)
+            if (newWallet[i].walletAddress == walletAddres)
             {   
                 walletIndex = i;
                 hasBeenFound = true;

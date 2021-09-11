@@ -1,7 +1,7 @@
 Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application id from moralis.io
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
 
-var owners = ["0x55DC41A449452d6e1A8fE915bBb607D97678263B", "0xF367CCe608Abe92370C5eA151ed9510438ebD61f", "0xBFb5a2d6353Eb76DF2A185d653332d2002521c52", "0xdB9A13Fa808d9C99Ff66248B42F75c30fb6F1150"]
+
 
 $(window).on("load",function(){
     $(".loader-wrapper").fadeOut(1200);
@@ -30,6 +30,7 @@ async function init() {
     var accounts = await web3.eth.getAccounts()
     account = accounts[0]
 }
+
 async function login(){
     console.log("login clicked");
     var user = await Moralis.Web3.authenticate();
