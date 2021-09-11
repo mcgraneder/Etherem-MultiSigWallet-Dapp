@@ -6,15 +6,28 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MultiSigWallet {
 
+////////////////////////////Global Variables & Mappings///////////////////////////
+
     address MultiSigInstance;
     address mainOwner;
-    address[] owners;
-
-    //conensus limit for approvals
     uint public limit;
     uint256 public depositId = 0;
     uint256 public withdrawalId = 0;
     uint256 public transferId = 0;
+    Transfer[] transferRequests;
+    address[] owners;
+     string[] public tokenList;
+
+    mapping(address => mapping(uint => bool)) public approvals;
+    mapping(address => mapping(string => uint)) public balances;
+    mapping(string => Token) public tokenMapping;
+    mapping(address => mapping(string => uint256)) public ERC20Tokenbalances;
+
+
+
+////////////////////////////Constructor///////////////////////////
+//used to set the main owner, the approval limit and sets eth as default token
+//on the deployment of the contract
 
     constructor(address _owner) {
         mainOwner = _owner;
@@ -23,9 +36,10 @@ contract MultiSigWallet {
         tokenList.push("ETH");
     }
     
-    //set up data structures. each trasnfer has diff properties
-    //like amount, the reviever, how many approvals it has, the state of the
-    //transfer etc
+
+////////////////////////////Data Strructures (Structs)///////////////////////////
+//here we have a transfer struct and token struct used to create instances of each
+
     struct Transfer{
         string ticker;
         uint amount;
@@ -43,17 +57,8 @@ contract MultiSigWallet {
     }
     
     
-    //here we create instances of our structs so we can keep logs
-    Transfer[] transferRequests;
-    
-    //double mpping which maps an address and the transaction id to an approval boolean
-    //false if not approved true if so
-    mapping(address => mapping(uint => bool)) public approvals;
-    mapping(address => mapping(string => uint)) public balances;
-    mapping(string => Token) public tokenMapping;
-    
-    //modifier which we can lace in function definitions to restrict access of that 
-    //function to the wallet owners
+////////////////////////////Modifiers///////////////////////////
+
     modifier onlyOwners(){
         bool owner = false;
         for(uint i=0; i<owners.length;i++){
@@ -71,37 +76,18 @@ contract MultiSigWallet {
          _;
     }
     
-    //evets
+
+////////////////////////////Events///////////////////////////
+
     event fundsDeposited(string ticker, address from, uint256 id, uint amount, uint256 timeStamp);
     event fundsWithdrawed(string ticker, address from, uint256 id, uint amount, uint256 timeStamp);
     event TransferRequestCreated(string ticker, uint id, uint _amount, address _initiator, address _receiver);
     event ApprovalReceived(string ticker, uint id, uint _approvals, address _approver);
     event TransferApproved(string ticker, uint id);
-    // event t(uint id, address sender, address receiver, uint amount, uint timeOfTransfer);
     event transferRequestApproved(string ticker, uint id, address sender, address receiver, uint amount, uint timeStamp);
     event transferRequestCancelled(string ticker, uint id, address sender, address receiver, uint amount, uint timeStamp);
 
    
-    
-    //we will begin with a double mapping that maps an address token ticker or symbol
-    // which maps to the balance of that token. We can have balances of many types of
-    //tokens /eth so we need a mapping to keep track of this
-    mapping(address => mapping(string => uint256)) public ERC20Tokenbalances;
-    string[] public tokenList;
-
-    function setWalletAddress(address _address) private {
-        MultiSigInstance = _address;
-    }
-    
-    function callAddOwner(address owner, address wallet) private {
-        MultiSigFactory factory = MultiSigFactory(MultiSigInstance);
-        factory.addOwner(owner, wallet);
-    }
-
-    function callRemoveOwner(address owner, address wallet) private {
-        MultiSigFactory factory = MultiSigFactory(MultiSigInstance);
-        factory.removeOwner(owner, wallet);
-    }
     
     function addToken(string memory ticker, address tokenAddress) external onlyOwners {
 
@@ -111,6 +97,7 @@ contract MultiSigWallet {
         tokenList.push(ticker);
     }
     
+////////////////////////////Functions for Dynamically Adding and Removing Wallet Owners///////////////////////////
     //add user function. require owner is not already in the wallet array
     function addUsers(address _owners, address _address, address walletAddress) public onlyOwners
     {
@@ -148,6 +135,23 @@ contract MultiSigWallet {
         setWalletAddress(_address);
         callRemoveOwner(_user, walletAddress );
     }
+
+//this function is used to set the address of the current logged in wallet instance that the user is using
+    function setWalletAddress(address _address) private {
+        MultiSigInstance = _address;
+    }
+
+//this function updates the users list of available wallets. This function is used from the multisig fsctory contract   
+    function callAddOwner(address owner, address wallet) private {
+        MultiSigFactory factory = MultiSigFactory(MultiSigInstance);
+        factory.addOwner(owner, wallet);
+    }
+
+//this function updates the users list of available wallets. This function is used from the multisig fsctory contract   
+    function callRemoveOwner(address owner, address wallet) private {
+        MultiSigFactory factory = MultiSigFactory(MultiSigInstance);
+        factory.removeOwner(owner, wallet);
+    }
     
     
     //gets wallet users
@@ -156,12 +160,9 @@ contract MultiSigWallet {
         return owners;
     }
     
-    function getApprovalLimit() public view returns (uint)
-    {
-        return (limit);
-    }
+   
     
-    
+////////////////////////////Functions for deopositing and withdrawing assets to and from the wallet///////////////////////////
     //deposit function. require deposit amount i sgreater than 0 and withdrawalRequests//the wallet oweners array is greater than 1
     function deposit() public onlyOwners payable {
         
@@ -215,26 +216,8 @@ contract MultiSigWallet {
     }
 
         
-    //next we want to make a get balance function
-    function getAccountBalance(string memory ticker) public view returns(uint)
-    {
-        return balances[msg.sender][ticker];
-    }
+////////////////////////////Functions for approving, cancelling and executing transfers within the wallet///////////////////////////
 
-    //get contratc balance
-    function getContractBalance() public view returns(uint)
-    {
-        return address(this).balance;
-    }
-    
-    
-    //next we want to make q function to return the address of the wallet owner
-    function getOwner() public view returns(address)
-    {
-        return msg.sender;
-    }
-    
-    
     //Create an instance of the Transfer struct and add it to the transferRequests array
     function createTransfer(string memory _ticker, uint _amount, address payable _receiver) public onlyOwners {
 
@@ -323,17 +306,38 @@ contract MultiSigWallet {
         
     }
     
-    
-    function getApprovalState(uint _id) public view returns(uint)
-    {
-        return transferRequests[_id].approvals;
-    }
-    
-    
+////////////////////////////Helper functions and blockhain reading functions///////////////////////////
+
+   
+ 
     //Should return all transfer requests
     function getTransferRequests() public view returns (Transfer[] memory){
        
         return transferRequests;
+    }
+
+     function getApprovalLimit() public view returns (uint)
+    {
+        return (limit);
+    }
+
+    //next we want to make a get balance function
+    function getAccountBalance(string memory ticker) public view returns(uint)
+    {
+        return balances[msg.sender][ticker];
+    }
+
+    //get contratc balance
+    function getContractBalance() public view returns(uint)
+    {
+        return address(this).balance;
+    }
+    
+    
+    //next we want to make q function to return the address of the wallet owner
+    function getOwner() public view returns(address)
+    {
+        return msg.sender;
     }
 }
 
@@ -388,9 +392,7 @@ contract MultiSigFactory {
             if (newWallet[i].walletAddress == walletAddres){
                 walletId = newWallet[i].walletID;
             }
-        }
-        
-        
+        }  
         return walletId;
     }
 
@@ -415,3 +417,12 @@ contract MultiSigFactory {
     }
      
 }   
+
+
+
+
+
+
+
+
+

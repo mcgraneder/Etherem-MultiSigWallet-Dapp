@@ -208,6 +208,7 @@ function depositFunds(token) {
   async function showTxInformation(e) {
 
     var id = e.target.id;
+    console.log(id)
     var event = e.target.closest("table").className
     var eventName
     var tableName;
@@ -219,24 +220,24 @@ function depositFunds(token) {
     
     if (event == "deposit-detail-table") {
       eventName = "fundsDeposited"
-      tableName = "Deposit tableRowIndex: "
+      tableName = "Deposit table: "
     }
     if (event == "pending-transfer-detail-table") {
       eventName = "TransferRequestCreated"
-      tableName = "Transfer tableRowIndex: "
+      tableName = "Transfer table: "
     }
     else if(event == "withdrawal-detail-table") {
       eventName = "fundsWithdrawed"
-      tableName = "Withdrawal tableRowIndex: "
+      tableName = "Withdrawal table: "
     }
     else if (event == "transfer-detail-table") {
       eventName = "transferRequestApproved"
-      tableName = "Transfer tableRowIndex: "
+      tableName = "Transfer table: "
     
     }
     else if(event =="cancelled-transfer-detail-table") {
       eventName = "transferRequestCancelled"
-      tableName = "Cancelled-Trnasfer tableRowIndex: "
+      tableName = "Cancelled-Trnasfer table: "
     }
    
     document.getElementById("tx-details").innerHTML = tableName + id;

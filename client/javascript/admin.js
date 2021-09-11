@@ -113,7 +113,7 @@ function addUser(){
           addUserToTable1.innerHTML += `
           <tr class="tablerow">
               <td>${addUserNullAddressField.value}</td>
-              <td>${"Evan McGrane"}</td>
+              <td>${"No name provided"}</td>
               <td ><span id=${addUserNullAddressField.value} class="testb">Remove</span></td>
           </tr>`
 

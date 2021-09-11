@@ -459,5 +459,7 @@ transferInfo.addEventListener("click", showTxInformation);
 const CancelledTransferInfo = document.querySelectorAll("table")[5];
 CancelledTransferInfo.addEventListener("click", showTxInformation);
 
+var approveTransfer = document.getElementById("approveTransfer")
+approveTransfer.onclick = approveTransferRequest
 loadWeb3();
 loadBlockchainData()

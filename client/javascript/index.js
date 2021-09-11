@@ -71,6 +71,9 @@ export async function loadBlockchainData() {
       window.alert('contract not deployed to detected network.')
       
   }
+  await contractInstance.methods.tokenList(0).call().then(function(result) {
+    console.log(result)
+  })
 
   displayBalance()
 
