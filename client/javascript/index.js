@@ -5,7 +5,8 @@ Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application i
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
 
 var currentSelectedToken
-var account
+var account = ""
+var acc = ""
 var contractFactoryInstance
 var contractInstance
 
@@ -30,6 +31,7 @@ export async function loadFactory() {
 
   //gets all user accounts and displays the current user on the UI (navbar)
   var accounts = await web3.eth.getAccounts()
+  var acc = accounts[0]
   account = currentLoggedInUser;    
  
   
@@ -48,6 +50,20 @@ export async function loadFactory() {
   await contractFactoryInstance.methods.getWalletID(currentSelectedWallet).call().then(function(result) {
     document.getElementById("display-wallet-id").innerHTML = "Wallet ID: " + result;
 
+  })
+
+  await contractFactoryInstance.methods.getUserWallets().call().then(function(result) {
+    var found = false
+    for(let i = 0; i < result.length; i++) {
+      if(currentSelectedWallet = result[i]){
+        found = true
+        break
+      }
+    }
+    console.log(found)
+    if (found == false) {
+      window.location.href = "walletInterface.html"
+    }
   })
 
 }

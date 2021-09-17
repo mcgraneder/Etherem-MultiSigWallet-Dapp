@@ -64,5 +64,10 @@ var currentLoggedInUser = JSON.parse(retrieveCurrentLoggedInUser).user
 console.log('retrieveCurrentLoggedInUser: ', JSON.parse(retrieveCurrentLoggedInUser).user);
 console.log(currentLoggedInUser)
 
+var pageLoadObject = { 'section': "transfer-section"};
+localStorage.setItem('pageLoadObject', JSON.stringify(pageLoadObject));
+
+var testObject = { 'token': "ETH"};
+localStorage.setItem('testObject', JSON.stringify(testObject));
 loadWeb3()
 init()

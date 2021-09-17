@@ -103,7 +103,7 @@ function depositFunds(token) {
       })
     }
     else {
-      var dep = contractInstance.methods.depositERC20Token(web3.utils.toWei(String(nullDepositField.value), "ether"), currentSelectedToken).send({from: account}).on("transactionHash", function(hash) {   
+        contractInstance.methods.depositERC20Token(web3.utils.toWei(String(nullDepositField.value), "ether"), currentSelectedToken).send({from: account}).on("transactionHash", function(hash) {   
         loadLoader();
         
       }).on("receipt", function(receipt) {
