@@ -1,19 +1,25 @@
 import data from '../../build/contracts/MultiSigFactory.json' assert { type: "json" };
 import data1  from '../../build/contracts/MultiSigWallet.json' assert { type: "json" };
+import erc20abi from "./ERC20Abi.json" assert { type: "json" };
 import { loadWeb3, loadFactory } from "./index.js"
+
 Moralis.initialize("GDTzbp8tldymuUuarksnrmguFjGjPtzIvTDHPMsq"); // Application id from moralis.io
 Moralis.serverURL = "https://um3tbvvvky01.bigmoralis.com:2053/server"; //Server url from moralis.io
 
 var contractInstance = "";
+var contractInstance1
 var contractFactoryInstance = "";
 var account = ""
 var currentSelectedToken
 
-
+const LINK = "0xBc9d279729B41871Ec6d0b075D3713eb3c5DB143"
+const VET = "0xF8d738896207687dd1C3d7E2235aDa67bbBe57f2"
+const UNI = "0xD8972BB15Ed596661f12d223f55a531F0e649694"
+const BNB = "0x6d8D8845165EF37eCb6695e183B45Fa759F1d603"
 // Retrieve the object from storage
 var retrievedObject = localStorage.getItem('testObject');
 var currentSelectedToken = JSON.parse(retrievedObject).token
-
+console.log(currentSelectedToken)
 // Retrieve the object from storage
 var retrievedUserWalletObject = localStorage.getItem('userWalletObject');
 var currentSelectedWallet = JSON.parse(retrievedUserWalletObject).wallet
@@ -47,6 +53,23 @@ async function loadBlockchainData() {
     }
 
     // document.getElementById("display-wallet-id").innerHTML = "WalletID: 1";
+    if(currentSelectedToken == "LINK") {
+    contractInstance1 = new web3.eth.Contract(erc20abi, "0xBc9d279729B41871Ec6d0b075D3713eb3c5DB143", {from: account})
+
+    }
+    else if (currentSelectedToken == "BNB") {
+    contractInstance1 = new web3.eth.Contract(erc20abi, "0x6d8D8845165EF37eCb6695e183B45Fa759F1d603", {from: account})
+
+    }
+    else if (currentSelectedToken == "VET") {
+      contractInstance1 = new web3.eth.Contract(erc20abi, "0xF8d738896207687dd1C3d7E2235aDa67bbBe57f2", {from: account})
+  
+    }
+    else if (currentSelectedToken == "UNI") {
+      contractInstance1 = new web3.eth.Contract(erc20abi, "0xD890xD8972BB15Ed596661f12d223f55a531F0e6496942BB15Ed596661f12d223f55a531F0e649694", {from: account})
+  
+      }
+    
    
     loadAdminTables("fundsDeposited")
     loadAdminTables("fundsWithdrawed")
@@ -75,7 +98,7 @@ async function loadAdminTables(tableName) {
     })
 }
 
-function depositFunds(token) {
+async function depositFunds(token) {
   
     var nullDepositField = document.getElementById("deposit-field");
     if (nullDepositField.value == "") {
@@ -84,7 +107,7 @@ function depositFunds(token) {
     }
     
     if(currentSelectedToken == "ETH") {
-      var dep = contractInstance.methods.deposit().send({value: web3.utils.toWei(String(nullDepositField.value), "ether"), from: account}).on("transactionHash", function(hash) {   
+      var dep = await contractInstance.methods.deposit().send({value: web3.utils.toWei(String(nullDepositField.value), "ether"), from: account}).on("transactionHash", function(hash) {   
         loadLoader();
         
       }).on("receipt", function(receipt) {
@@ -103,7 +126,8 @@ function depositFunds(token) {
       })
     }
     else {
-        contractInstance.methods.depositERC20Token(web3.utils.toWei(String(nullDepositField.value), "ether"), currentSelectedToken).send({from: account}).on("transactionHash", function(hash) {   
+        await contractInstance1.methods.approve(currentSelectedWallet, web3.utils.toWei(String(nullDepositField.value), "ether")).send({from: account})
+        await contractInstance.methods.depositERC20Token(web3.utils.toWei(String(nullDepositField.value), "ether"), currentSelectedToken).send({from: account}).on("transactionHash", function(hash) {   
         loadLoader();
         
       }).on("receipt", function(receipt) {
@@ -122,7 +146,7 @@ function depositFunds(token) {
       })
     }
     
-    updateAdminTables("fundsDeposited")
+    await updateAdminTables("fundsDeposited")
   }
   
   //lets any of the wallet owners withdraw both ETH nad ERC20 tokens into the wallet
@@ -367,6 +391,9 @@ function togglePopup2(){
   }
   loadWeb3();
 
+ 
+  
+  
 loadFactory();
 loadBlockchainData()
 // console.log("the factory adress is " + factoryAddress)

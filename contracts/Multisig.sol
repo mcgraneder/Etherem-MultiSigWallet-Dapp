@@ -116,7 +116,7 @@ contract MultiSigWallet {
         //from the current array calculate the value of minimum consensus
         limit = owners.length - 1;
         
-        setWalletAddress(_address);
+         MultiSigInstance = _address;
         callAddOwner(_owners, walletAddress );
     }
     
@@ -137,14 +137,11 @@ contract MultiSigWallet {
         owners.pop();
         limit= owners.length - 1;
         
-        setWalletAddress(_address);
+         MultiSigInstance = _address;
         callRemoveOwner(_user, walletAddress );
     }
 
 //this function is used to set the address of the current logged in wallet instance that the user is using
-    function setWalletAddress(address _address) private {
-        MultiSigInstance = _address;
-    }
 
 //this function updates the users list of available wallets. This function is used from the multisig fsctory contract   
     function callAddOwner(address owner, address wallet) private {
@@ -179,47 +176,49 @@ contract MultiSigWallet {
         depositId++;
     }
 
-    function depositERC20Token(uint amount, string memory ticker) external onlyOwners tokenExists(ticker) returns(bool _success){
+    function depositERC20Token(uint amount, string memory ticker) external onlyOwners tokenExists(ticker) {
 
         require(tokenMapping[ticker].tokenAddress != address(0));
     
         IERC20(tokenMapping[ticker].tokenAddress).transferFrom(msg.sender, address(this), amount);
         balances[msg.sender][ticker] += amount;  
-        _success = true;
+        
         //emit deposited(msg.sender, address(this), amount, ticker);
         emit fundsDeposited(ticker, msg.sender, depositId, amount, block.timestamp);
         depositId++;
-
-        return _success;
     }
 
     //after transfer is called our balance i < transaction amount thus we cannot withfraw
     //update amount after transfer function.
-    function withdraw(uint _amount) public onlyOwners returns (uint)
-    {
-        require(balances[msg.sender]["ETH"] >= _amount);
-        
-        payable(msg.sender).transfer(_amount);
-        balances[msg.sender]["ETH"] -= _amount;
+    function withdraw(string memory ticker, uint _amount) public onlyOwners {
+    
+        require(balances[msg.sender][ticker] >= _amount);
+        balances[msg.sender]["ticker"] -= _amount;
 
-        emit fundsWithdrawed("ETH", msg.sender, withdrawalId, _amount, block.timestamp);
-        withdrawalId++;
+        if(keccak256(bytes(ticker)) == keccak256(bytes("ETH")))  {
+            payable(msg.sender).transfer(_amount);
+        }
+        else {
+            require(tokenMapping[ticker].tokenAddress != address(0));
+            IERC20(tokenMapping[ticker].tokenAddress).transfer(msg.sender, _amount);
+        }
         
-        return balances[msg.sender]["ETH"];
+        emit fundsWithdrawed(ticker, msg.sender, withdrawalId, _amount, block.timestamp);
+        withdrawalId++;
         
     }
 
     //withdrawal function
-    function withdrawERC20Token(uint amount, string memory ticker) external tokenExists(ticker) onlyOwners {
-        require(tokenMapping[ticker].tokenAddress != address(0));
-        require(balances[msg.sender][ticker] >= amount);
+    // function withdrawERC20Token(uint amount, string memory ticker) external tokenExists(ticker) onlyOwners {
+    //     require(tokenMapping[ticker].tokenAddress != address(0));
+    //     require(balances[msg.sender][ticker] >= amount);
 
-        balances[msg.sender][ticker] += amount;
-        IERC20(tokenMapping[ticker].tokenAddress).transfer(msg.sender, amount);
-        emit fundsWithdrawed(ticker, msg.sender, withdrawalId, amount, block.timestamp);
-        withdrawalId++;
+    //     balances[msg.sender][ticker] -= amount;
+    //     IERC20(tokenMapping[ticker].tokenAddress).transfer(msg.sender, amount);
+    //     emit fundsWithdrawed(ticker, msg.sender, withdrawalId, amount, block.timestamp);
+    //     withdrawalId++;
 
-    }
+    // }
 
         
 ////////////////////////////Functions for approving, cancelling and executing transfers within the wallet///////////////////////////
@@ -299,6 +298,13 @@ contract MultiSigWallet {
      //now we need to create a function to actually transfer the funds after the
     //transfer has been recieved
     function TransferFunds(string memory _ticker, uint _id) private {
+
+        if(keccak256(bytes(_ticker)) == keccak256(bytes("ETH")))  {
+            transferRequests[_id].receiver.transfer(transferRequests[_id].amount);
+        }
+        else {
+            IERC20(tokenMapping[_ticker].tokenAddress).transfer(transferRequests[_id].receiver, transferRequests[_id].amount);
+        }
         
         balances[transferRequests[_id].receiver][_ticker] += transferRequests[_id].amount;
        
@@ -330,11 +336,7 @@ contract MultiSigWallet {
         return tokenList;
     }
     
-    function getTicker(address tokenAddress) public view returns (string memory) {
-        
-        require(tokenAddress != address(0));
-        return ERC20(tokenAddress).symbol();
-    }
+    
 }
 
 

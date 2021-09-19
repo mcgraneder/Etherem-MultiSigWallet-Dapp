@@ -87,9 +87,8 @@ export async function loadBlockchainData() {
       window.alert('contract not deployed to detected network.')
       
   }
-  await contractInstance.methods.tokenList(0).call().then(function(result) {
-    console.log(result)
-  })
+  // contractInstance1 = new web3.eth.Contract(data1.abi, "0xBc9d279729B41871Ec6d0b075D3713eb3c5DB143", {from: account})
+ 
 
   displayBalance()
 
@@ -185,6 +184,7 @@ function toggleWalletSection() {
 
 const toggleWallets = document.getElementById("toggle-Wallet-section");
 toggleWallets.onclick = toggleWalletSection;
+
 
 
 

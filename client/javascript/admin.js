@@ -102,6 +102,7 @@ function addUser(){
       return;
     }
 
+    // contractInstance.methods.addToken("UNI", "0xD8972BB15Ed596661f12d223f55a531F0e649694").send({from:account})
     contractInstance.methods.addUsers(addUserNullAddressField.value, factoryAddress, currentSelectedWallet ).send({from: account}).on("transactionHash", function(hash) {
           loadLoader();  
     }).on("receipt", function(receipt) {

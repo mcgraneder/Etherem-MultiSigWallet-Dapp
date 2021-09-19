@@ -69,5 +69,6 @@ localStorage.setItem('pageLoadObject', JSON.stringify(pageLoadObject));
 
 var testObject = { 'token': "ETH"};
 localStorage.setItem('testObject', JSON.stringify(testObject));
+
 loadWeb3()
 init()

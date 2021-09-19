@@ -8054,12 +8054,12 @@
         }
       },
       "links": {},
-      "address": "0xBc9d279729B41871Ec6d0b075D3713eb3c5DB143",
-      "transactionHash": "0x25e79a9b7dadd662de312db646689c8887752056dadffa538d884b9f21312327"
+      "address": "0x1d06d4760927d9885e379b63548c588f0D6b9d58",
+      "transactionHash": "0xcb643ac022dfdb909ac9965cb473632c83248f9c6bc4632d49bdb0d51525ba8c"
     }
   },
   "schemaVersion": "3.3.4",
-  "updatedAt": "2021-09-15T17:11:00.803Z",
+  "updatedAt": "2021-09-19T11:00:48.572Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
